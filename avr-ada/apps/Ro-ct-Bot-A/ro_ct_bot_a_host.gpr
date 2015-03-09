@@ -1,0 +1,58 @@
+--  -----------------------------------------------------------------------
+--  The "Ro c't Bot A" project is free software; you can redistribute it
+--  and/or modify it under terms of the GNU General Public License as
+--  published by the Free Software Foundation; either version 2, or
+--  (at your option) any later version.  The AVR-Ada Library is
+--  distributed in the hope that it will be useful, but WITHOUT ANY
+--  WARRANTY; without even the implied warranty of MERCHANTABILITY or
+--  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public
+--  License for more details.
+--  -----------------------------------------------------------------------
+
+
+with "../../avr/avr_host.gpr";
+
+project Ro_Ct_Bot_A_Host is
+
+
+   Main_Name := external ("MAIN", "ro_ct_bot_a");
+   for Main use (Main_Name);
+
+   for Languages use ("Ada");
+   for Object_Dir use "obj_host";
+   for Exec_Dir use ".";
+
+   package Builder is
+      for Global_Configuration_Pragmas use
+         AVR_Host.Builder'Global_Configuration_Pragmas;
+   end Builder;
+
+
+   package Compiler is
+      for Default_Switches ("Ada") use
+        AVR_Host.Compiler'Default_Switches ("Ada") &
+        "-g" &
+        "-gnatwl" &
+        "-gnat05" &
+        "-gnata";  --  activate pragma Debug
+   end Compiler;
+
+   --   package Binder is
+   --      for Default_Switches ("Ada") use
+   --        AVR_Host.Binder'Default_Switches ("Ada") &
+   --        ("-t");
+   --   end Binder;
+
+   for Source_Dirs use (".",
+                        "./abs_layer",
+                        "./abs_layer/host");
+
+
+   package Naming is
+      for Body ("Debug")             use "debug_host.adb";
+      for Body ("LCD")               use "lcd_host.adb";
+      for Body ("LED")               use "led_host.adb";
+   end Naming;
+
+
+end Ro_Ct_Bot_A_Host;

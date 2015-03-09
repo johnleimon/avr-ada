@@ -1,0 +1,134 @@
+
+demo.elf:     file format elf32-avr
+
+Disassembly of section .text:
+
+00000000 <__vectors>:
+   0:	0a c0       	rjmp	.+20     	; 0x16
+   2:	22 c0       	rjmp	.+68     	; 0x48
+   4:	21 c0       	rjmp	.+66     	; 0x48
+   6:	20 c0       	rjmp	.+64     	; 0x48
+   8:	1f c0       	rjmp	.+62     	; 0x48
+   a:	1f c0       	rjmp	.+62     	; 0x4a
+   c:	1d c0       	rjmp	.+58     	; 0x48
+   e:	1c c0       	rjmp	.+56     	; 0x48
+  10:	1b c0       	rjmp	.+54     	; 0x48
+  12:	1a c0       	rjmp	.+52     	; 0x48
+  14:	19 c0       	rjmp	.+50     	; 0x48
+
+00000016 <__ctors_end>:
+  16:	11 24       	eor	r1, r1
+  18:	1f be       	out	0x3f, r1	; 63
+  1a:	cf ed       	ldi	r28, 0xDF	; 223
+  1c:	cd bf       	out	0x3d, r28	; 61
+
+0000001e <__do_copy_data>:
+  1e:	10 e0       	ldi	r17, 0x00	; 0
+  20:	a0 e6       	ldi	r26, 0x60	; 96
+  22:	b0 e0       	ldi	r27, 0x00	; 0
+  24:	e4 ef       	ldi	r30, 0xF4	; 244
+  26:	f0 e0       	ldi	r31, 0x00	; 0
+  28:	03 c0       	rjmp	.+6      	; 0x30
+
+0000002a <.do_copy_data_loop>:
+  2a:	c8 95       	lpm
+  2c:	31 96       	adiw	r30, 0x01	; 1
+  2e:	0d 92       	st	X+, r0
+
+00000030 <.do_copy_data_start>:
+  30:	a0 36       	cpi	r26, 0x60	; 96
+  32:	b1 07       	cpc	r27, r17
+  34:	d1 f7       	brne	.-12     	; 0x2a
+
+00000036 <__do_clear_bss>:
+  36:	10 e0       	ldi	r17, 0x00	; 0
+  38:	a0 e6       	ldi	r26, 0x60	; 96
+  3a:	b0 e0       	ldi	r27, 0x00	; 0
+  3c:	01 c0       	rjmp	.+2      	; 0x40
+
+0000003e <.do_clear_bss_loop>:
+  3e:	1d 92       	st	X+, r1
+
+00000040 <.do_clear_bss_start>:
+  40:	a3 36       	cpi	r26, 0x63	; 99
+  42:	b1 07       	cpc	r27, r17
+  44:	e1 f7       	brne	.-8      	; 0x3e
+  46:	50 c0       	rjmp	.+160    	; 0xe8
+
+00000048 <__bad_interrupt>:
+  48:	db cf       	rjmp	.-74     	; 0x0
+
+0000004a <__vector_5>:
+  4a:	1f 92       	push	r1
+  4c:	0f 92       	push	r0
+  4e:	0f b6       	in	r0, 0x3f	; 63
+  50:	0f 92       	push	r0
+  52:	11 24       	eor	r1, r1
+  54:	2f 93       	push	r18
+  56:	8f 93       	push	r24
+  58:	9f 93       	push	r25
+  5a:	80 91 60 00 	lds	r24, 0x0060
+  5e:	99 27       	eor	r25, r25
+  60:	00 97       	sbiw	r24, 0x00	; 0
+  62:	19 f0       	breq	.+6      	; 0x6a
+  64:	01 97       	sbiw	r24, 0x01	; 1
+  66:	a9 f0       	breq	.+42     	; 0x92
+  68:	25 c0       	rjmp	.+74     	; 0xb4
+  6a:	80 91 61 00 	lds	r24, 0x0061
+  6e:	90 91 62 00 	lds	r25, 0x0062
+  72:	01 96       	adiw	r24, 0x01	; 1
+  74:	90 93 62 00 	sts	0x0062, r25
+  78:	80 93 61 00 	sts	0x0061, r24
+  7c:	80 91 61 00 	lds	r24, 0x0061
+  80:	90 91 62 00 	lds	r25, 0x0062
+  84:	8f 5f       	subi	r24, 0xFF	; 255
+  86:	93 40       	sbci	r25, 0x03	; 3
+  88:	a9 f4       	brne	.+42     	; 0xb4
+  8a:	81 e0       	ldi	r24, 0x01	; 1
+  8c:	80 93 60 00 	sts	0x0060, r24
+  90:	11 c0       	rjmp	.+34     	; 0xb4
+  92:	80 91 61 00 	lds	r24, 0x0061
+  96:	90 91 62 00 	lds	r25, 0x0062
+  9a:	01 97       	sbiw	r24, 0x01	; 1
+  9c:	90 93 62 00 	sts	0x0062, r25
+  a0:	80 93 61 00 	sts	0x0061, r24
+  a4:	80 91 61 00 	lds	r24, 0x0061
+  a8:	90 91 62 00 	lds	r25, 0x0062
+  ac:	89 2b       	or	r24, r25
+  ae:	11 f4       	brne	.+4      	; 0xb4
+  b0:	10 92 60 00 	sts	0x0060, r1
+  b4:	80 91 61 00 	lds	r24, 0x0061
+  b8:	90 91 62 00 	lds	r25, 0x0062
+  bc:	9b bd       	out	0x2b, r25	; 43
+  be:	8a bd       	out	0x2a, r24	; 42
+  c0:	9f 91       	pop	r25
+  c2:	8f 91       	pop	r24
+  c4:	2f 91       	pop	r18
+  c6:	0f 90       	pop	r0
+  c8:	0f be       	out	0x3f, r0	; 63
+  ca:	0f 90       	pop	r0
+  cc:	1f 90       	pop	r1
+  ce:	18 95       	reti
+
+000000d0 <ioinit>:
+  d0:	83 e8       	ldi	r24, 0x83	; 131
+  d2:	8f bd       	out	0x2f, r24	; 47
+  d4:	81 e0       	ldi	r24, 0x01	; 1
+  d6:	8e bd       	out	0x2e, r24	; 46
+  d8:	1b bc       	out	0x2b, r1	; 43
+  da:	1a bc       	out	0x2a, r1	; 42
+  dc:	88 e0       	ldi	r24, 0x08	; 8
+  de:	87 bb       	out	0x17, r24	; 23
+  e0:	80 e8       	ldi	r24, 0x80	; 128
+  e2:	89 bf       	out	0x39, r24	; 57
+  e4:	78 94       	sei
+  e6:	08 95       	ret
+
+000000e8 <main>:
+  e8:	cf ed       	ldi	r28, 0xDF	; 223
+  ea:	d0 e0       	ldi	r29, 0x00	; 0
+  ec:	de bf       	out	0x3e, r29	; 62
+  ee:	cd bf       	out	0x3d, r28	; 61
+  f0:	ef df       	rcall	.-34     	; 0xd0
+  f2:	ff cf       	rjmp	.-2      	; 0xf2
+Disassembly of section .data:

@@ -1,0 +1,26 @@
+diff --git a/Makefile b/Makefile
+index 8857f04..ea6f773 100644
+--- a/Makefile
++++ b/Makefile
+@@ -179,7 +179,7 @@ $(INSTALL_CGPR_DIR)/avr.cgpr: $(INSTALL_CGPR_DIR)
+ 	$(RM) tmp-avr.cgpr
+ 	$(CHMOD) $(INSTALL_FILE_MODE) $(INSTALL_CGPR_DIR)/avr.cgpr
+ 
+-install_cgpr: $(INSTALL_CGPR_DIR)/avr.cgpr
++install_cgpr:
+ 
+ .PHONY: install_rts install_libs install_apps install_cgpr
+ 
+diff --git a/avr/avr_lib/Makefile b/avr/avr_lib/Makefile
+index e7785f7..9be19a1 100644
+--- a/avr/avr_lib/Makefile
++++ b/avr/avr_lib/Makefile
+@@ -145,7 +145,7 @@ board-%/lib:
+ stamp-links: $(MCU_SPECS) $(BOARD_MCU_SPECS)
+ 	touch $@
+ 
+-stamp-libs: $(LIB_LIST) $(BOARD_LIB_LIST) $(THREAD_LIB_LIST)
++stamp-libs: $(LIB_LIST) $(BOARD_LIB_LIST)
+ 	touch $@
+ 
+ .PHONY: build_libs

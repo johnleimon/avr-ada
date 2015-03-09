@@ -1,0 +1,81 @@
+2013-02-21  Jakub Jelinek  <jakub@redhat.com>
+
+	PR bootstrap/56258
+	* doc/invoke.texi (-fdump-rtl-pro_and_epilogue): Use @item
+	instead of @itemx.
+
+	* gnat-style.texi (@title): Remove @hfill.
+	* projects.texi: Avoid line wrapping inside of @pxref or
+	@xref.
+
+	* doc/cp-tools.texinfo (Virtual Machine Options): Use just
+	one @gccoptlist instead of 3 separate ones.
+
+--- gcc/doc/invoke.texi.jj	2013-01-31 22:57:22.000000000 +0100
++++ gcc/doc/invoke.texi	2013-02-20 13:06:47.516405739 +0100
+@@ -5612,7 +5612,7 @@ Dump after the peephole pass.
+ @opindex fdump-rtl-postreload
+ Dump after post-reload optimizations.
+ 
+-@itemx -fdump-rtl-pro_and_epilogue
++@item -fdump-rtl-pro_and_epilogue
+ @opindex fdump-rtl-pro_and_epilogue
+ Dump after generating the function prologues and epilogues.
+ 
+--- gcc/ada/gnat-style.texi.jj	2012-08-10 12:57:33.000000000 +0200
++++ gcc/ada/gnat-style.texi	2013-02-20 13:06:03.042667300 +0100
+@@ -42,7 +42,7 @@ Texts.  A copy of the license is include
+ @titlepage
+ @titlefont{GNAT Coding Style:}
+ @sp 1
+-@title @hfill A Guide for GNAT Developers
++@title A Guide for GNAT Developers
+ @subtitle GNAT, The GNU Ada Compiler
+ @versionsubtitle
+ @author Ada Core Technologies, Inc.
+--- gcc/ada/projects.texi.jj	2013-01-04 11:16:24.000000000 +0100
++++ gcc/ada/projects.texi	2013-02-20 17:48:41.582645159 +0100
+@@ -48,8 +48,7 @@ project files allow you to specify:
+ @item Source file naming conventions; you can specify these either globally or for
+   individual compilation units (@pxref{Naming Schemes}).
+ @item Change any of the above settings depending on external values, thus enabling
+-  the reuse of the projects in various @b{scenarios} (@pxref{Scenarios
+-  in Projects}).
++  the reuse of the projects in various @b{scenarios} (@pxref{Scenarios in Projects}).
+ @item Automatically build libraries as part of the build process
+   (@pxref{Library Projects}).
+ 
+@@ -360,8 +359,8 @@ locating the specified source files in t
+ 
+ @item For various reasons, it is sometimes useful to have a project with no
+   sources (most of the time because the attributes defined in the project
+-  file will be reused in other projects, as explained in @pxref{Organizing
+-  Projects into Subsystems}. To do this, the attribute
++  file will be reused in other projects, as explained in
++  @pxref{Organizing Projects into Subsystems}. To do this, the attribute
+   @emph{Source_Files} is set to the empty list, i.e. @code{()}. Alternatively,
+   @emph{Source_Dirs} can be set to the empty list, with the same
+   result.
+@@ -388,8 +387,9 @@ locating the specified source files in t
+   This can be done thanks to the attribute @b{Excluded_Source_Files}
+   (or its synonym @b{Locally_Removed_Files}).
+   Its value is the list of file names that should not be taken into account.
+-  This attribute is often used when extending a project, @xref{Project
+-  Extension}. A similar attribute @b{Excluded_Source_List_File} plays the same
++  This attribute is often used when extending a project,
++  @xref{Project Extension}. A similar attribute
++  @b{Excluded_Source_List_File} plays the same
+   role but takes the name of file containing file names similarly to
+   @code{Source_List_File}.
+ 
+--- libjava/classpath/doc/cp-tools.texinfo.jj	2012-12-20 11:38:51.000000000 +0100
++++ libjava/classpath/doc/cp-tools.texinfo	2013-02-20 19:10:42.573925165 +0100
+@@ -2025,7 +2025,7 @@ Doclet, grouped by type.  Explanations a
+ 
+ @item Virtual Machine Options
+ @xref{Virtual Machine Options,,Options Controlling Gjdoc Behavior}.
+-@gccoptlist{-classpath}  @gccoptlist{-bootclasspath}  @gccoptlist{-J}@var{vmopt}
++@gccoptlist{-classpath  -bootclasspath  -J @var{vmopt}}
+ 
+ @end table
+ 

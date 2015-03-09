@@ -1,0 +1,45 @@
+---------------------------------------------------------------------------
+-- The AVR-Ada Library is free software;  you can redistribute it and/or --
+-- modify it under terms of the  GNU General Public License as published --
+-- by  the  Free Software  Foundation;  either  version 2, or  (at  your --
+-- option) any later version.  The AVR-Ada Library is distributed in the --
+-- hope that it will be useful, but  WITHOUT ANY WARRANTY;  without even --
+-- the  implied warranty of MERCHANTABILITY or FITNESS FOR A  PARTICULAR --
+-- PURPOSE. See the GNU General Public License for more details.         --
+---------------------------------------------------------------------------
+
+--  GPR file for building the thread run time library from the
+--  original sources.  It is an alternative to the original Makefile.
+
+
+with "mcu.gpr";
+
+library project Threads_Lib is
+
+   MCU : MCU.MCU_Type := MCU.MCU;
+
+   for Library_Name use "avr-thread";
+   for Library_Dir  use "avr_lib/" & MCU & "/thread-lib";
+   for Library_Kind use "static";
+   for Externally_Built use "false";
+   
+   for Languages use ("C", "Asm_Cpp");
+   for Object_Dir use "avr_lib/" & MCU & "/thread-obj";
+
+   for Source_Dirs use ("threads-1.3/src");
+
+   for Source_Files use ("avr-thread.c", "avr-thread-event.c",
+                         "avr-thread-enable.c", "avr-thread-stop.c",
+                         "avr-thread-sleep.c", "avr-thread-mutex.c",
+                         "avr-thread-mutex-basic.c", "avr-thread-asm.h",
+                         "avr-thread.h", "avr-thread-def.h",
+                         "avr-thread-switch.S", "avr-thread-isr.S");
+
+   package Compiler is
+      Flags := ("-Os", "-Wall", "-Werror", "-mmcu=" & MCU);
+
+      for Switches ("C")       use Flags &  "-std=c99";
+      for Switches ("Asm_Cpp") use Flags;
+   end Compiler;
+
+end Threads_Lib;

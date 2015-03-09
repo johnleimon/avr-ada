@@ -1,0 +1,26 @@
+with "c:\Devel\Ada\aunit-1.05\aunit.gpr";
+
+project Unit_Tests is
+
+   package Compiler is
+      for Default_Switches ("Ada") use
+        ("-O2",
+         "-gnato",
+         "-fstack-check",
+         "-g",
+         "-gnata",
+         "-gnatwjklmrz");
+   end Compiler;
+
+   package Builder is
+      null;
+   end Builder;
+
+   package Ide is
+      for Vcs_Kind use "Subversion";
+   end Ide;
+
+   for Source_Files use ();
+
+end Unit_Tests;
+

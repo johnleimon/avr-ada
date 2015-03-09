@@ -1,0 +1,27 @@
+# Makefile for fatfs package tests :
+# Warren Gay  Mon Nov 1, 2010
+#
+# These tests are compile and run under a POSIX system.
+# For example, this can be built and tested under Cygwin
+# or Linux.
+#
+# 1. make -f Makefile.fatfs
+# 2. ./test_fatfs                      # Allow to run -- may take an hour
+# 3. If no failed assertions or messages of failure, 
+#    then the test completes normally.
+# 4. make -f Makefile.fatfs clobber    # cleans up test files
+
+SRCDIR = -I../fatfs
+OPTZOPTS = -g
+GNATOPTS = $(OPTZOPTS) -Wall -gnat05 -gnatwl -gnata -gnatVa -gnatf -gnatwr $(SRCDIR)
+
+all:
+	gnatmake $(GNATOPTS) test_fatfs.adb
+
+clean:
+	rm -f *.o *.exe *.stackdump *.ali b~*.ad[sb]
+
+clobber: clean
+	rm -f *.img
+
+# End

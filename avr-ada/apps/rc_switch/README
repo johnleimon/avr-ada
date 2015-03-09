@@ -1,0 +1,75 @@
+RC switch
+=========
+
+RC switch reads the pulse from a hobby remote control receiver channel. 
+
+Different output modes will be activated depending on the detected
+pulse length of the signal. 
+
+
+Reading the servo data signal
+=============================
+
+The input signal is connected to a pin change interrupt. Timer0 is
+cleared when the pulse turns high. The value of timer0 is used for
+switching modes at the falling edge interrupt.
+
+
+       /---------\                           /----------\   
+       |         |                           |          |
+       |         |                           |          |
+       |         |                           |          |
+       |         |                           |          |
+       |         |                           |          |
+       |         |                           |          |
+-------|         |---------------------------|          |---------
+
+       ^         ^                           ^          ^         
+       |         |                           |          |         
+ start Timer0   read Timer0            start Timer0    read Timer0
+
+
+The standard pulse length of a servo signal varies between 1ms (full
+left) and 2ms (full right).  The internal MCU clock frequency and the
+prescaler of timer0 msut be adjusted so that the timer does not
+overflow at the longest time that is to be measured, i.e. no overflow
+before 2ms. Adding some safty margin we can say that the overflow may
+happen at 2.5ms at the earliest.  The following table shows timer
+values for different combinations of internal clock and timer
+prescaler.
+
+MCU freq  | timer prescaler |          timer value at       |
+          |                 |  1ms  | 1.5ms |  2ms  | 2.5ms |
+----------+-----------------+-------+-------+-------+-------|
+ 1000000  |       1/8       |  125  |  183  |  250  |   56* |
+ 1000000  |       1/64      |   16  |   24  |   32  |   40  |
+ 8000000  |       1/64      |  125  |  183  |  250  |   56* |
+ 8000000  |       1/256     |   31  |   45  |   62  |   75  |
+16000000  |       1/256     |   63  |   90  |  125  |  150  |
+
+* value after one overflow
+
+We can actually see that even a single overflow is tolerable as we can
+safely distinguish between extrem values at the edges and error cases. 
+
+
+Setting Modes
+=============
+
+We assume a MCU frequency of 8 MHz and a timer prescaler of 1/256.
+
+There is a clear error condition if the signal length is longer than
+2.5ms which corresponds to a timer value of 75.  The other extreme is
+a too short signal of less than 0.5ms that corresponds to a timer
+value of 24.
+
+
+2-position switch
+-----------------
+
+If your transmitter has hard switches they typically switch from one
+extreme (1ms) to the other extreme (2ms). That gives the following
+table:
+
+timer value :  0 - 24  |  25 - 44  |  45 - 75  |  76 - 255
+status      :   error  |    off    |    on     |   error

@@ -1,0 +1,36 @@
+-- -*- mode: ada-gpr -*-
+---------------------------------------------------------------------------
+-- The AVR-Ada Library is free software;  you can redistribute it and/or --
+-- modify it under terms of the  GNU General Public License as published --
+-- by  the  Free Software  Foundation;  either  version 2, or  (at  your --
+-- option) any later version.  The AVR-Ada Library is distributed in the --
+-- hope that it will be useful, but  WITHOUT ANY WARRANTY;  without even --
+-- the  implied warranty of MERCHANTABILITY or FITNESS FOR A  PARTICULAR --
+-- PURPOSE. See the GNU General Public License for more details.         --
+---------------------------------------------------------------------------
+
+
+with "avr.gpr";
+
+project Sensirion_Lib is
+
+   for Library_Name use "sht";
+   for Library_Dir  use "sensirion/lib";
+   for Library_Kind use "static";
+
+   for Languages use ("Ada");
+   for Object_Dir use "sensirion/obj";
+
+   package Builder  renames AVR.Builder;
+   package Compiler renames AVR.Compiler;
+   package Binder   renames AVR.Binder;
+   package Linker   renames AVR.Linker;
+
+   for Source_Dirs use ("sensirion");
+   for Source_Files use ("sht.ads",
+                         "sht-comm.ads",   "sht-comm.adb",
+                         "sht-calc.ads",   "sht-calc.adb",
+                         "sht-images.ads", "sht-images.adb",
+                         "sht-ll.ads",     "sht-ll.adb");
+
+end Sensirion_Lib;

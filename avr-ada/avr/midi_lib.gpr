@@ -1,0 +1,33 @@
+---------------------------------------------------------------------------
+-- The AVR-Ada Library is free software;  you can redistribute it and/or --
+-- modify it under terms of the  GNU General Public License as published --
+-- by  the  Free Software  Foundation;  either  version 2, or  (at  your --
+-- option) any later version.  The AVR-Ada Library is distributed in the --
+-- hope that it will be useful, but  WITHOUT ANY WARRANTY;  without even --
+-- the  implied warranty of MERCHANTABILITY or FITNESS FOR A  PARTICULAR --
+-- PURPOSE. See the GNU General Public License for more details.         --
+---------------------------------------------------------------------------
+
+with "avr.gpr";
+with "debug_lib.gpr";
+
+library project Midi_Lib is
+
+   for Library_Name use "midi";
+   for Library_Dir  use "midi/lib";
+   for Library_Kind use "static";
+
+   for Languages use ("Ada");
+   for Object_Dir use "midi/obj";
+
+   package Builder renames AVR.Builder;
+   package Compiler renames AVR.Compiler;
+   package Binder renames AVR.Binder;
+
+   for Source_Dirs use ("midi");
+   for Source_Files use ("midi.ads",               "midi.adb",
+                         "midi-receiver.ads",      "midi-receiver.adb",
+                         "midi-transmitter.ads",   "midi-transmitter.adb"
+                        );
+
+end Midi_Lib;

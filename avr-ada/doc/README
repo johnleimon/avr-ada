@@ -1,0 +1,127 @@
+-*- Mode: Text -*-
+
+[Announce] AVR-Ada V0.3 released
+
+We are proud to announce a new release of AVR-Ada, one of the first 
+GCC based Ada compilers targeting 8-bit microcontrolers.
+
+You can get the project description and some documentation at
+
+     avr-ada.sourceforge.net
+     
+The SF development pages with the download section are at
+
+     www.sourceforge.net/projects/avr-ada
+     
+
+AVR-Ada is available in source form only.  Binary packages of the 
+cross compiler hosted on Linux and Windows are expected to appear with 
+future releases of cdk4avr (cdk4avr.sourceforge.net) and WinAVR 
+(winavr.sourceforge.net).
+
+Feel free to join the mailing list at 
+
+     http://lists.sourceforge.net/mailman/listinfo/avr-ada-devel.  
+     
+It has quite low traffic.
+
+
+Please use SF's bug reporting system for guiding future development 
+of AVR-Ada.
+
+
+Status
+======
+
+The goal of the AVR-Ada project is to make the gcc based Ada compiler GNAT
+available for the AVR microcontrollers.
+
+More specifically the project provides 
+
+ -  a GNAT compiler based on the existing AVR and Ada support in gcc
+ -  a minimalistic Ada runtime system
+ -  a useful AVR specific support library
+
+The current distribution of AVR-Ada is V0.3. It is based on gcc-3.4.4.
+In the AVR-Ada project we never had problems with the Ada compiler
+itself. It is quite stable.
+
+The Ada run time system (RTS) on the other hand is still not even a
+*run* time system.  It is more a compile time system :-). All files in
+the RTS are only needed at compile time.  As a consequence we don't
+have support for exceptions nor for tasking (multithreading).
+
+There is a bit of AVR specific support.  Some type and interface
+definitions, timing routines, eeprom access, UART, and most
+importantly the necessary definitions for most AVR parts.
+
+Some sample programs in the apps/ directory show how to use the
+compiler and the library.  This includes the tutorial program from
+an older avr-libc distribution and some of Peter Fleury's example programs
+(http://homepage.sunrise.ch/mysunrise/peterfleury/avr-software.html)
+translated to Ada.
+
+The documentation is still low and consists only of the pages at
+avr-ada.sourceforge.net.  A copy of the pages is in the directory
+AVR-Ada/web/ for offline reading.  Feel free to ask any question on
+the mailing list.
+
+
+News
+====
+
+0.3 (2005-08-03)
+----------------
+
+The part description spec files are completely new.  The Ada specs are
+now generated directly from Atmel's XML part description files of AVR
+Studio 4.11 build 406 SP 2.  In previous versions they were derived
+from the C header files of avr-libc.
+
+We changed the syntax for accessing single bits from bit numbering to
+masks in AVR.IO.  Simple names in the part description specs now
+contain bit masks, the pin number is still available with the name
+xxx_Bit.  E.g.:
+ 
+    --  Port D Data Register bit 3
+    PORTD3_Bit               : constant Bit_Number := 3;
+    PORTD3                   : constant Byte       := 16#08#;
+ 
+The previous Set_IO routines in AVR.IO were renamed to simply Put
+omitting the _IO, the Get_IO have become Get.  That is more in the
+style of other Ada IO packages like Text_IO.
+
+New packages for string handling and accessing constants in program
+space.  They are actually a stripped down version of
+Ada.Strings.Bounded.
+
+We build part specific libraries now.  That means that we can provide
+specific functionality adapted to a given part.  It is currently used
+for the UART and EEPROM access only, though.
+
+The example programs for accessing 1-wire devices and an LCD are not
+part of the distribution anymore.  They are only available via CVS.
+There is also starting support for the atmega169 based AVR Butterfly
+in the CVS repository (UART, LCD, and dataflash).
+
+
+0.2 (2004-10-28)
+----------------
+
+We modified the compiler patches to fit cleanly to gcc-3.4.3.  They
+probably also fit in previous gcc-3.4.x releases; I never tried. 
+
+The "freestanding" patch is now considerably shorter since part of
+what it does (avoid some code in the binder file) is now provided
+directly in gcc.  The corresponding binder options was previously
+called "standalone", but that expression is used elsewhere in GNAT.
+
+You can now use "Library Projects" with AVR-Ada.  I.e. you can
+have gpr files with "Library_Name", etc.  The only permitted value for
+"Library_Kind" is "static".  This feature is used for the Avr library.
+
+gcc-3.4.3 now fully supports -fdata-sections (PR14064) and
+-ffunction-sections for AVR targets in C and Ada.  This
+particularily useful for embedded systems where code and static data
+must not be wasted.
+

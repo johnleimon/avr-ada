@@ -1,0 +1,14 @@
+The installation path of the "AVR Toolchain" is stored in several
+places in the registry:
+
+  HKEY_LOCAL_MACHINE\SOFTWARE\Free Software Foundation\AVR Toolchain
+    BINUTILS
+    G++
+    GCC
+
+have the installation path as values
+
+The best key is probably
+
+  HKEY_LOCAL_MACHINE\SOFTWARE\Atmel\AVR Toolchain\3.0.0.240
+    InstallLocation

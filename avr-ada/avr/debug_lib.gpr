@@ -1,0 +1,47 @@
+-- -*- mode: ada-gpr -*-
+---------------------------------------------------------------------------
+-- The AVR-Ada Library is free software;  you can redistribute it and/or --
+-- modify it under terms of the  GNU General Public License as published --
+-- by  the  Free Software  Foundation;  either  version 2, or  (at  your --
+-- option) any later version.  The AVR-Ada Library is distributed in the --
+-- hope that it will be useful, but  WITHOUT ANY WARRANTY;  without even --
+-- the  implied warranty of MERCHANTABILITY or FITNESS FOR A  PARTICULAR --
+-- PURPOSE. See the GNU General Public License for more details.         --
+---------------------------------------------------------------------------
+
+
+with "avr_tools.gpr";
+with "avr_lib.gpr";
+with "mcu.gpr";
+
+library project Debug_Lib is
+
+   for Library_Name use "debug";
+   for Library_Dir  use "debug/lib";
+   for Library_Kind use "static";
+
+   for Languages use ("Ada");
+   for Object_Dir use "debug/obj";
+
+   package Builder renames AVR_Tools.Builder;
+   package Compiler renames AVR_Tools.Compiler;
+   package Binder renames AVR_Tools.Binder;
+
+   type Internal_Clock_Prescaler is
+      ("Has_Prescaler",
+       "No_Prescaler");
+
+   for Source_Dirs use ("debug");
+   for Source_Files use ("debug.ads", "debug.adb",
+                         "debug-init.adb", "debug-init_prescaler.adb");
+
+   package Naming is
+   case MCU.MCU is
+   when "atmega169" =>
+      for Body ("Debug.Init") use "debug-init_prescaler.adb";
+   when others =>
+      for Body ("Debug.Init") use "debug-init.adb";
+   end case;
+   end Naming;
+
+end Debug_Lib;

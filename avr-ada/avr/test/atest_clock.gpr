@@ -1,0 +1,59 @@
+---------------------------------------------------------------------------
+-- The AVR-Ada Library is free software;  you can redistribute it and/or --
+-- modify it under terms of the  GNU General Public License as published --
+-- by  the  Free Software  Foundation;  either  version 2, or  (at  your --
+-- option) any later version.  The AVR-Ada Library is distributed in the --
+-- hope that it will be useful, but  WITHOUT ANY WARRANTY;  without even --
+-- the  implied warranty of MERCHANTABILITY or FITNESS FOR A  PARTICULAR --
+-- PURPOSE. See the GNU General Public License for more details.         --
+---------------------------------------------------------------------------
+
+
+with "../avr.gpr";
+
+project Atest_Clock is
+
+
+   Main_Name := external ("MAIN", "atest_clock");
+
+   for Main use (Main_Name);
+
+   for Languages use ("Ada");
+   for Object_Dir use "obj";
+   for Exec_Dir use ".";
+
+
+   package Builder is
+      for Default_Switches ("Ada") use AVR.Builder'Default_Switches ("Ada");
+
+      for Global_Configuration_Pragmas use
+         AVR.Builder'Global_Configuration_Pragmas;
+
+      for Executable_Suffix use ".elf";
+
+   end Builder;
+
+
+   package Compiler is
+      for Default_Switches ("Ada") use AVR.Compiler'Default_Switches ("Ada");
+   end Compiler;
+
+
+   package Binder is
+      for Default_Switches ("Ada") use AVR.Binder'Default_Switches ("Ada");
+   end Binder;
+
+
+   package Linker is
+      --  create map file and add cross references.  Put the map file
+      --  in the parent directory of the build directory which happens
+      --  to be ./obj.
+      Mapfile_Opt := "-Wl,-Map=../" & Main_Name & ".map,--cref";
+      for Default_Switches ("Ada") use AVR.Linker'Default_Switches ("Ada")
+        & Mapfile_Opt;
+   end Linker;
+
+
+   for Source_Dirs use (".");
+
+end Atest_clock;

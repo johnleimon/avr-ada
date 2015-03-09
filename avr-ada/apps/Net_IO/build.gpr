@@ -1,0 +1,43 @@
+---------------------------------------------------------------------------
+-- The AVR-Ada Library is free software;  you can redistribute it and/or --
+-- modify it under terms of the  GNU General Public License as published --
+-- by  the  Free Software  Foundation;  either  version 2, or  (at  your --
+-- option) any later version.  The AVR-Ada Library is distributed in the --
+-- hope that it will be useful, but  WITHOUT ANY WARRANTY;  without even --
+-- the  implied warranty of MERCHANTABILITY or FITNESS FOR A  PARTICULAR --
+-- PURPOSE. See the GNU General Public License for more details.         --
+---------------------------------------------------------------------------
+
+
+with "avr.gpr";
+
+with "debug_lib.gpr";
+project Build is
+
+   for Main use ("main");
+
+   for Languages use ("Ada");
+   for Object_Dir use "obj";
+   for Exec_Dir use ".";
+
+   package Builder renames AVR.Builder;
+
+   package Compiler is
+      for Default_Switches ("Ada") use
+        AVR.Compiler'Default_Switches ("Ada") &
+        "-gnatep=atmega644.def";
+   end Compiler;
+
+   package Binder renames AVR.Binder;
+   package Linker is
+      for Default_Switches ("Ada") use
+        AVR.Linker'Default_Switches ("Ada")
+        & "obj/enc28j60.o"
+        --        & "obj/stack.o"
+        --      & "usart.o";
+        --      & "obj/enc28j60.o" & "obj/stack.o" & "usart.o";
+        ;
+   end Linker;
+
+
+end Build;

@@ -1,0 +1,9 @@
+2008-11-11 PUBLISH_THREADS_V1_3
+  Bring library in sync with my production version.
+  Fix case on file names for case-sensitive file systems.
+  Use _BV() instead of BV().
+  Add includes for <compat/deprecated.h>.
+  dos2unix some files.
+  Fix example code in documentation.
+
+  Thanks to Peter G. Marczis for pointing out the bugs with file case under Linux, plus the anachronistic uses of BV(), inp(), and outp().  (I punted on inp() and outp() by using <compat/deprecated.h>.)

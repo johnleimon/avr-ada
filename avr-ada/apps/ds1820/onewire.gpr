@@ -1,0 +1,36 @@
+-- -*- mode: ada-gpr -*-
+---------------------------------------------------------------------------
+-- The AVR-Ada Library is free software;  you can redistribute it and/or --
+-- modify it under terms of the  GNU General Public License as published --
+-- by  the  Free Software  Foundation;  either  version 2, or  (at  your --
+-- option) any later version.  The AVR-Ada Library is distributed in the --
+-- hope that it will be useful, but  WITHOUT ANY WARRANTY;  without even --
+-- the  implied warranty of MERCHANTABILITY or FITNESS FOR A  PARTICULAR --
+-- PURPOSE. See the GNU General Public License for more details.         --
+---------------------------------------------------------------------------
+
+
+with "mcu.gpr";
+
+project OneWire extends "onewire_lib" is
+
+   for Library_Dir use "owlib";
+   for Object_Dir use "owobj";
+
+   case MCU.MCU is
+   when "atmega169" =>
+      for Source_Files use ("one_wire-avr_wiring-butterfly.ads");
+   when others =>
+      for Source_Files use ("one_wire-avr_wiring.ads");
+   end case;
+
+
+   package Naming is
+   case MCU.MCU is
+   when "atmega169" =>
+      for Spec ("One_Wire.AVR_Wiring") use "one_wire-avr_wiring-butterfly.ads";
+   when others =>
+      for Spec ("One_Wire.AVR_Wiring") use "one_wire-avr_wiring.ads";
+   end case;
+   end Naming;
+end OneWire;

@@ -1,0 +1,60 @@
+-- -*- mode: ada-gpr -*-
+---------------------------------------------------------------------------
+-- The AVR-Ada Library is free software;  you can redistribute it and/or --
+-- modify it under terms of the  GNU General Public License as published --
+-- by  the  Free Software  Foundation;  either  version 2, or  (at  your --
+-- option) any later version.  The AVR-Ada Library is distributed in the --
+-- hope that it will be useful, but  WITHOUT ANY WARRANTY;  without even --
+-- the  implied warranty of MERCHANTABILITY or FITNESS FOR A  PARTICULAR --
+-- PURPOSE. See the GNU General Public License for more details.         --
+---------------------------------------------------------------------------
+
+
+with "mcu.gpr";
+with "avr_tools.gpr";
+with "avr_lib.gpr";
+with "crc_lib.gpr";
+with "debug_lib.gpr";
+
+library project OneWire_Lib is
+
+   for Library_Name use "onewire";
+   for Library_Dir  use "onewire/lib";
+   for Library_Kind use "static";
+
+
+   for Languages use ("Ada");
+   for Object_Dir use "onewire/obj";
+
+
+   package Builder renames AVR_Tools.Builder;
+   package Compiler renames AVR_Tools.Compiler;
+   package Binder renames AVR_Tools.Binder;
+   package Linker renames AVR_Tools.Linker;
+
+   for Source_Dirs use ("onewire");
+   Sources := ("one_wire.ads",           "one_wire.adb",
+               "one_wire-avr_wiring.ads",
+               "one_wire-rom.ads",       "one_wire-rom.adb",
+               "one_wire-search.ads",    "one_wire-search.adb",
+               "one_wire-commands.ads",
+               "one_wire-temperature_sensors.ads",
+               "one_wire-temperature_sensors.adb");
+
+   case MCU.MCU is
+   when "atmega169" =>
+      for Source_Files use Sources & "one_wire-init_comm-atmega169.adb";
+   when others =>
+      for Source_Files use Sources & "one_wire-init_comm.adb";
+   end case;
+
+
+   package Naming is
+   case MCU.MCU is
+   when "atmega169" =>
+      for Body ("One_Wire.Init_Comm") use "one_wire-init_comm-atmega169.adb";
+   when others =>
+   end case;
+   end Naming;
+
+end OneWire_Lib;

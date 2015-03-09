@@ -1,0 +1,54 @@
+---------------------------------------------------------------------------
+-- The AVR-Ada Library is free software;  you can redistribute it and/or --
+-- modify it under terms of the  GNU General Public License as published --
+-- by  the  Free Software  Foundation;  either  version 2, or  (at  your --
+-- option) any later version.  The AVR-Ada Library is distributed in the --
+-- hope that it will be useful, but  WITHOUT ANY WARRANTY;  without even --
+-- the  implied warranty of MERCHANTABILITY or FITNESS FOR A  PARTICULAR --
+-- PURPOSE. See the GNU General Public License for more details.         --
+---------------------------------------------------------------------------
+
+--  Generic application project.  You have to extend this project file
+--  in your own application
+
+with "mcu.gpr";
+with "avr_tools.gpr";
+with "avr_lib.gpr";
+
+project AVR_App is
+
+   Main_Name := external ("AVRADA_MAIN", "main");
+   for Main use (Main_Name);
+
+   RTS := external ("RTS", "");
+
+   for Languages use ("Ada");
+
+   package Builder renames AVR_Tools.Builder;
+   package Compiler renames AVR_Tools.Compiler;
+   package Binder renames AVR_Tools.Binder;
+   package Linker is
+      --  create map file and add cross references.  Put the map file
+      --  in the parent directory of the build directory which happens
+      --  to be ./obj.
+      Mapfile_Opt := "-Wl,-Map=../" & Main_Name & ".map,--cref";
+
+      for Default_Switches ("Ada") use
+        (--  the following line does not solve the problem that
+         --  avr-gnatlink does not find the target parameters in
+         --  system.ads
+         --  "--RTS=" & RTS & "/" & MCU.Arch, -- tell the linker about the RTS
+         --
+         "-Wl,--gc-sections",    -- remove sections of unused code
+         "-gdwarf-2",            -- keep binder file
+         "-Wl,--relax",          -- linker relaxation
+         "--GCC=avr-gcc -Os -mmcu=" & MCU.MCU
+          & " --RTS=" & RTS & MCU.Arch
+          & " -gnatp -fdata-sections -ffunction-sections",
+         Mapfile_Opt);
+   end Linker;
+
+
+   for Source_Files use ();
+
+end AVR_App;

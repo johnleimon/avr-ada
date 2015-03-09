@@ -1,0 +1,12 @@
+WinAVR-20090313 hat Schlüssel in HLMS/Free Software Foundation/WinAVR-20090313 installiert
+
+BINUTILS
+G++
+GCC
+
+haben jeweils als Wert den Installationspfad
+
+HKEY_LOCAL_MACHINE\SOFTWARE\WinAVR hat Schlüssel
+
+20090313 mit Wert Installationspfad
+

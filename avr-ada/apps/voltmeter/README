@@ -1,0 +1,4 @@
+simple voltmeter based on Arduino platform
+
+Read ADC value form adc0 and send raw value to the serial line.
+Reference voltage is the internal 1.1V value

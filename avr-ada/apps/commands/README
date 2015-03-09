@@ -1,0 +1,4 @@
+A command interpreter that shows some internals of the connected chip
+
+The string handling is heavily influenced by Dmitry Kazakov's string
+package.

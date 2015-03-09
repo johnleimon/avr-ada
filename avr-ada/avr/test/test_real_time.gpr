@@ -1,0 +1,13 @@
+with "..\avr_host.gpr";
+with "unit_tests.gpr";
+
+project Test_Real_Time is
+
+   for Main use ("time_harness.adb");
+
+   package Compiler renames Unit_Tests.Compiler;
+
+   package Ide renames Unit_Tests.Ide;
+
+end Test_Real_Time;
+

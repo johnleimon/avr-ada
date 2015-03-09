@@ -1,0 +1,470 @@
+
+\documentclass{report}
+\usepackage{tex2page}
+\usepackage{makeidx}
+\usepackage{alltt}
+\usepackage{xspace}
+
+% tex2page definitions
+
+\ifx\shipout\UnDeFiNeD % HTML only 
+  % Choose png format for images
+  \def\TZPimageformat{png}
+  \imgpreamble 
+    \usepackage{xspace}
+  
+    \let\LaTeXdocument\document 
+    \def\document{\LaTeXdocument\LARGE} 
+    \def\sub#1{_#1}
+    \def\subrm#1{_\mathrm{#1}}
+  \endimgpreamble 
+\else
+  \newcommand{\mailto}[1]{#1}
+\fi
+
+% Reset underscore to be a regular character.
+% Use \sub{} and \subrm{} to use math subscripting.
+\newcommand{\sub}[1]{_#1}
+\newcommand{\subrm}[1]{_\mathrm{#1}}
+\catcode`\_=11
+
+% Some helpers in case I want to change their format
+\newcommand{\AVRThreadsLibrary}{\AVR Threads Library\xspace}
+\newcommand{\Atmel}{Atmel\xspace}
+\newcommand{\AVR}{AVR\xspace}
+\newcommand{\AVRGCC}{\AVR GCC\xspace}
+\newcommand{\WinAVR}{WinAVR\xspace}
+\newcommand{\ISR}{interrupt service routine\xspace}
+
+% Commands to help with formatting
+\newcommand{\lit}[1]{\texttt{#1}}
+\newcommand{\litindex}[1]{\index{#1@\lit{#1}}}
+\newcommand{\funref}[1]{\ref{#1}}
+\newcommand{\structref}[1]{\ref{#1}}
+\newcommand{\result}[1]{\lit{#1}}
+\newcommand{\argument}[1]{\lit{#1}}
+\newcommand{\reg}[1]{\lit{#1}\litindex{#1}}
+\newcommand{\code}[1]{\lit{#1}}
+\newenvironment{displayc}{\begin{alltt}}{\end{alltt}}
+\newenvironment{argdesc}{\begin{quote}\begin{description}}{\end{description}\end{quote}}
+
+% Function entries
+% Define (and re-define) \thisfunction to refer to the latest function in question
+\newcommand{\thisfunction}{\emph{unknown function}}
+\newcommand{\function}[3]{\subsubsection*{\lit{#1}\hfill\emph{#2}\xrtag{#3}{\lit{#3}}\litindex{#3}}\renewcommand{\thisfunction}{\lit{#3}\xspace}}
+\newcommand{\structure}[3]{\subsubsection*{\lit{#1}\hfill\emph{#2}\xrtag{#3}{\lit{#3}}\litindex{#3}}\renewcommand{\thisfunction}{\lit{#3}\xspace}}
+\newcommand{\thisstructure}{\thisfunction}
+
+% Some textual short-cuts
+\newcommand{\treatasopaque}{It should be treated as an opaque object.}
+
+% Generate an index
+\makeindex
+
+
+\title{\AVRThreadsLibrary 1.3}
+\author{Dean Ferreyra\\\mailto{dean@octw.com}\\http://www.bourbonstreetsoftware.com/}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\sloppy
+
+\chapter{Introduction}
+
+The \AVRThreadsLibrary provides basic preemptive multi-threading to
+the \Atmel \AVR family of microcontrollers.  It is written mostly in C
+with some assembly language.  It implements a simple round-robin style
+task switcher.
+
+This library provides basic thread start and stop functions, a couple
+of flavors of mutual exclusion semaphore, and events to help
+synchronize threads.
+
+I have released this code under the
+\urlh{http://www.gnu.org/copyleft/lesser.html}{GNU Lesser General
+  Public License} with the hope that others might find it useful.
+
+\chapter{Build and Installation}
+
+To build and install the \AVRThreadsLibrary, you need to have already
+installed the \AVRGCC cross-compiler.
+
+\section{Build}
+\index{building from source}
+
+To install the \AVRThreadsLibrary, unpack the source tree.  If you
+downloaded the \lit{*.tgz} version, you can do this with the following
+command:
+\begin{displayc}
+  tar -xzf threads-1.3-src.tgz
+\end{displayc}
+
+Next, change directory to the head of the source tree that was just
+unpacked and run the \code{make} command:
+\begin{displayc}
+  $ cd threads-1.3
+  $ make
+\end{displayc}
+This should build the \AVRThreadsLibrary for all the supported \AVR
+microcontrollers.
+
+\section{Installation}
+\index{installation}
+
+Once the libraries have been successfully built, you need to install
+the library components to a location where the \AVRGCC compiler can
+find them.
+
+The default installation directory prefix is \code{/usr/local}.  If
+you wish to change this, you will have to edit the \code{src/Makefile}
+file in the source tree.  In the Makefile, you'll find a line that
+looks like this:
+\begin{displayc}
+  prefix = /usr/local
+\end{displayc}
+Change this line to desired directory prefix. For example, if you're
+using \urlh{http://winavr.sourceforge.net/}{\WinAVR}, you will need to
+change this this point to where \WinAVR has been installed.  For
+example, if \WinAVR has been installed in \verb{c:\WinAVR}, then
+change the prefix line to this:
+\begin{displayc}
+  prefix = c:/WinAVR
+\end{displayc}
+
+Finally, from the head of the source tree, or from the \code{src}
+directory, run this:
+\begin{displayc}
+  \$ make install
+\end{displayc}
+
+\chapter{Basic Functions and Structures}
+
+\section{Initializing the Library}
+
+\subsection{Functions}
+
+\function{void avr_thread_init(void)}{function}{avr_thread_init()}
+
+This function initializes the \AVRThreadsLibrary.  It must be called
+before any other \AVRThreadsLibrary function is called.
+
+This function sets up a default context so that it can treat the
+currently running program as a thread.  It also prepares the ``idle''
+thread that runs when no other thread can run.  After calling this
+function, task switches can occur, both implicit and explicit.
+
+\section{Starting, Stopping, and Pausing Threads}
+
+\subsection{Functions}
+
+\function{void avr_thread_start(avr_thread_context* context, void (*fn)(void), uint8_t* stack, uint16_t stack_size)}{function}{avr_thread_start()}
+
+This function starts a new thread of execution given a pointer to a
+\structref{avr_thread_context}, \argument{context}; a pointer to a
+function where the thread will begin execution, \argument{fn}; a
+pointer to a stack, \argument{stack}; and the size of the stack,
+\argument{stack_size}.
+
+The memory pointed to by \argument{context} must remain valid
+throughout the life of the new thread.
+
+The stack space provided must also remain valid throughout the life of
+the new thread.  The stack for each thread must be large enough to
+satisfy the stack needs of the thread's code, plus enough additional
+space to hold the entire register state at the time of a task switch.
+
+\function{void avr_thread_stop(void)}{function}{avr_thread_stop()}
+
+This function stops the current thread.  It does this by taking the
+current thread out of the task list and forcing a task switch.
+
+\function{void avr_thread_sleep(uint16_t ticks)}{function}{avr_thread_sleep()}
+
+This function places the given thread to sleep for the given number of
+task-switcher ticks, \argument{ticks}.  The thread automatically
+awakens after the given time has elapsed.
+
+Passing zero to this function forces a task switch and is equivalent
+to calling \funref{avr_thread_yield()}.
+
+\function{void avr_thread_yield(void)}{inline}{avr_thread_yield()}
+
+This function forces an explicit task-switch away from the current
+thread.  It is implemented by calling \funref{avr_thread_sleep()} with
+an argument of zero.
+
+\section{Task Switcher}
+
+The library needs the help of a timer interrupt and its \ISR to
+provide preemptive multitasking.  The following two functions are
+designed to be called from within an \ISR tagged with the \lit{naked}
+compiler attribute.  For example, here is the \ISR for TIMER2 on the
+\Atmel ATmega128 microcontroller:
+\begin{verbatim}
+void SIG_OUTPUT_COMPARE2(void) __attribute__((naked));
+void SIG_OUTPUT_COMPARE2(void)
+{
+    /* Global interrupt can be re-enabled here if desired. */
+    /* sei(); */
+    avr_thread_isr_start();
+    /* Place your normal ISR code here. */
+    /* ... */
+    /* This must be the last function called. */
+    avr_thread_isr_end();
+}
+\end{verbatim}
+Also, here is an example configuration of TIMER2 that yields
+approximately 1kHz preemptive task switch frequency with a 16MHz
+crystal:
+\begin{verbatim}
+    /* ... */
+    /* Setup TIMER2 mode.  Include reset on overflow bit. */
+    /* Approximately 1 kHz for a 16 MHz crystal. */
+    TCCR2 = _BV(WGM21) | _BV(CS21) | _BV(CS20);
+    OCR2 = 250;
+    TCNT2 = 0;
+    TIMSK |= _BV(OCIE2);
+    /* Initialize library. */
+    avr_thread_init();
+    /* Enable global interrupts to start preemptive task switching */
+    sei();
+    /* ... */
+\end{verbatim}
+
+\subsection{Functions}
+
+\function{void avr_thread_isr_start(void)}{function}{avr_thread_isr_start()}
+
+Call this function at the beginning of the interrupt service routine
+used to provide the preemptive multitasking.  This function saves
+registers on the stack in preparation for a task switch.  The \ISR
+must be declared with the attribute "naked".
+
+If you want to run your \ISR code with global interrupts enabled,
+place a call to \code{sei()} just before this function.  No other code
+should be placed ahead of the call to \thisfunction since this will
+disturb the thread context before this function has a chance to save
+it.
+
+\function{void avr_thread_isr_end(void)}{function}{avr_thread_isr_end()}
+
+Call this function at the end of the interrupt service routine used to
+provide the preemptive multitasking.  This function does not return.
+
+\chapter{Thread Synchronization}
+
+The \AVRThreadsLibrary provides two basic ways to synchronize threads:
+mutual exclusion semaphores\index{mutual exclusion semaphores}
+(mutexes\index{mutexes}) and events\index{events}.
+
+\section{Mutexes}\index{mutexes}\label{mutexes}
+
+Mutual exclusion semaphores, or mutexes, provide a way to ensure that
+only one thread is executing a particular piece of code at a time.
+
+The mutexes described here keep track of ownership and lock counts.
+This allows a thread to lock a mutex a number of times in the code
+path without having to worry about the thread blocking.  Also, threads
+that are blocked on these mutexes are awakened in the order that they
+blocked so that the thread that has been waiting the longest will be
+awakened when the mutex become available.
+
+\subsection{Functions}
+
+\function{uint8_t avr_thread_mutex_gain(volatile avr_thread_mutex* mutex, uint16_t ticks)}{function}{avr_thread_mutex_gain()}
+
+This function tries to gain ownership of the given mutex,
+\argument{mutex}.
+
+If the mutex is unlocked, the current thread locks the mutex and
+thereby gains ownership of the mutex, and this function returns
+\result{1} immediately.
+
+If the mutex is already locked and owned by the current thread, the
+lock-count is incremented and the function returns \result{1}
+immediately.
+
+If the mutex is already locked and owned by another thread, this
+thread blocks until the mutex becomes available or until the given
+number of ticks, \argument{ticks}, have elapsed.  If the thread
+successfully locks the mutex before the number of ticks have elapsed,
+the function return \result{1}.  Otherwise, the function times-out and
+returns \result{0}.  If the thread blocks and you have passed
+\argument{ticks} as zero, the function will wait indefinitely until
+the mutex becomes available.
+
+\function{void avr_thread_mutex_release(volatile avr_thread_mutex* mutex)}{function}{avr_thread_mutex_release()}
+
+This function releases the given mutex. The mutex is not really
+released until this function is called the same number of times as the
+\funref{avr_thread_mutex_gain()} function was called in locking the
+mutex.
+
+If multiple threads are waiting on this mutex, the thread that has
+been waiting the longest is released.
+
+\structure{struct avr_thread_mutex}{structure}{avr_thread_mutex}
+
+This structure is used by the \AVRThreadsLibrary to hold mutex data.
+\treatasopaque
+
+\section{Basic Mutexes}\index{mutexes, basic}\label{basic mutexes}
+
+Basic mutexes are very simple and lack some important features of the
+regular mutexes (see \ref{mutexes}).  While the advantage of basic
+mutexes is their execution-speed and a smaller code and memory
+foot-print, you should exercise care in using them since they do not
+keep track of ownership or lock counts.  For example, if a thread
+locks a basic mutex and tries to lock it again, the thread will block.
+
+\subsection{Functions}
+
+\function{void avr_thread_mutex_basic_gain(volatile avr_thread_mutex_basic* mutex)}{function}{avr_thread_mutex_basic_gain()}
+
+This function tries to lock the given basic mutex, \argument{mutex}.
+If the mutex is already locked, the thread blocks on the basic-mutex
+waiting for another thread to release the lock on the thread.
+
+A thread that has called \thisfunction should not call it again without first releasing the lock with \funref{avr_thread_mutex_basic_release()}.
+
+\function{uint8_t avr_thread_mutex_basic_test_and_gain(volatile avr_thread_mutex_basic* mutex)}{function}{avr_thread_mutex_basic_test_and_gain()}
+
+This function tries to lock the given basic mutex, \argument{mutex}.
+If it is not already locked by another thread, the mutex is locked and
+the function returns \result{1}.  If it is already locked by another
+thread, the function does not block but instead returns \result{0}
+immediately.
+
+\function{void avr_thread_mutex_basic_release(volatile avr_thread_mutex_basic* mutex)}{function}{avr_thread_mutex_basic_release()}
+
+This function releases the lock on the given basic mutex,
+\argument{mutex}.
+
+\structure{struct avr_thread_mutex_basic}{structure}{avr_thread_mutex_basic}
+
+This structure is used by the \AVRThreadsLibrary to hold basic mutex
+data.  \treatasopaque
+
+\chapter{Events}\index{events}
+
+\newcommand{\whilesignaled} {While the event is signaled, a thread
+  that calls \funref{avr_thread_event_wait()} or
+  \funref{avr_thread_event_wait_and_clear()} will return immediately.}
+
+Events provide a way to signal to other threads that an event has
+occurred.
+
+\section{Functions}
+
+\function{void avr_thread_event_set_wake_one(volatile avr_thread_event* event)}{function}{avr_thread_event_set_wake_one()}
+
+This function places the given event, \argument{event} in a signaled
+state.  If there are threads waiting on this event, the thread that
+has been waiting the longest is awakened.
+
+\whilesignaled
+
+\function{void avr_thread_event_set_wake_all(volatile avr_thread_event* event)}{function}{avr_thread_event_set_wake_all()}
+
+This function places the given event, \argument{event} in a signaled
+state.  If there are threads waiting on this event, all of them are
+awakened.
+
+\whilesignaled 
+
+\function{void avr_thread_event_clear(volatile avr_thread_event* event)}{function}{avr_thread_event_clear()}
+
+This function clears the given event, \argument{event}.  While the
+event is clear, a thread that calls \funref{avr_thread_event_wait()}
+or \funref{avr_thread_event_wait_and_clear()} will block until the
+event is signaled.
+
+\function{uint8_t avr_thread_event_wait(volatile avr_thread_event* event, uint16_t ticks)}{function}{avr_thread_event_wait()}
+
+This function waits for the given event, \argument{event}, to become
+signaled.
+
+If the event is signaled when this function is called, this function
+returns \result{1} immediately.  Otherwise, the thread is blocked
+until the event is signaled by another thread.
+
+While blocked, if the thread is awakened by another thread through a
+call to \funref{avr_thread_event_set_wake_all()} or
+\funref{avr_thread_event_set_wake_one()}, then this function returns
+\result{1}.  Otherwise, if the given number of ticks,
+\argument{ticks}, elapses, the function times-out and returns
+\result{0}.
+
+If you pass \argument{ticks} as zero, this function will wait
+indefinitely until the event becomes signaled.
+
+\function{uint8_t avr_thread_event_wait_and_clear(volatile avr_thread_event* event, uint16_t ticks)}{function}{avr_thread_event_wait_and_clear()}
+
+This function waits for the given event, \argument{event}, to become
+signaled.
+
+If the event is signaled when this function is called, this function
+clears the event and returns \result{1} immediately.  Otherwise, the
+thread is blocked until the event is signaled by another thread.
+
+While blocked, if the thread is awakened by another thread through a
+call to \funref{avr_thread_event_set_wake_all()} or
+\funref{avr_thread_event_set_wake_one()}, then this function clears
+the event and returns \result{1}.  Otherwise, if the given number of
+ticks, \argument{ticks}, elapses, the function times-out and returns
+\result{0}.
+
+If you pass \argument{ticks} as zero, this function will wait
+indefinitely until the event becomes signaled.
+
+\structure{struct avr_thread_event}{structure}{avr_thread_event}
+
+This structure is used by the \AVRThreadsLibrary to hold event data.
+\treatasopaque
+
+\chapter{Additional Functions and Structures}
+
+\newcommand{\avrthreadenabledisablepairing}
+{The \funref{avr_thread_enable()} and \funref{avr_thread_disable()}
+  functions keep track of how many times they've been called.  Task
+  switching will only be enabled when \funref{avr_thread_enable()} has
+  been called as many times as \funref{avr_thread_disable()} was
+  called in disabling task switching.}
+
+\section{Functions}
+
+\function{void avr_thread_enable(void)}{inline}{avr_thread_enable()}
+
+This function re-enables task switching that has been disabled by
+\funref{avr_thread_disable()}.
+
+\avrthreadenabledisablepairing
+
+\function{void avr_thread_disable(void)}{inline}{avr_thread_disable()}
+
+This function disables task switching.  Task switching is re-enabled
+by calling \funref{avr_thread_enable()}.
+
+\avrthreadenabledisablepairing
+
+\structure{struct avr_thread_context}{structure}{avr_thread_context}
+
+This structure holds data used by the \AVRThreadsLibrary to manage
+each thread.  \treatasopaque
+
+\chapter{Sample Program}
+
+Here is a sample program that demonstrates the basics of initializing
+the library and starting a thread.  It was originally written for the
+ATmega128.
+
+\verbatiminput{start-thread.c}
+
+% Place index on its own page
+\newpage
+\printindex
+
+\end{document}

@@ -1,0 +1,15 @@
+with "..\avr_host.gpr";
+with "unit_tests.gpr";
+
+project Test_AVR is
+
+   for Main use ("avr_harness.adb");
+
+   package Compiler renames Unit_Tests.Compiler;
+
+   package Builder renames Unit_Tests.Builder;
+
+   package Ide renames Unit_Tests.Ide;
+
+end Test_AVR;
+

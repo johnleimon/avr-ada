@@ -1,0 +1,98 @@
+#!/bin/sh
+
+#--------------------------------------------------------------------------
+#- The AVR-Ada Library is free software;  you can redistribute it and/or --
+#- modify it under terms of the  GNU General Public License as published --
+#- by  the  Free Software  Foundation;  either  version 2, or  (at  your --
+#- option) any later version.  The AVR-Ada Library is distributed in the --
+#- hope that it will be useful, but  WITHOUT ANY WARRANTY;  without even --
+#- the  implied warranty of MERCHANTABILITY or FITNESS FOR A  PARTICULAR --
+#- PURPOSE. See the GNU General Public License for more details.         --
+#-                                                                       --
+#- As a special exception, if other files instantiate generics from this --
+#- unit,  or  you  link  this  unit  with  other  files  to  produce  an --
+#- executable   this  unit  does  not  by  itself  cause  the  resulting --
+#- executable to  be  covered by the  GNU General  Public License.  This --
+#- exception does  not  however  invalidate  any  other reasons why  the --
+#- executable file might be covered by the GNU Public License.           --
+#--------------------------------------------------------------------------
+
+####################################################################
+
+echo -n "checking avr-gcc ..."
+avr-gcc -v > /dev/null 2>&1
+if [ $? -ne 0 ]; then
+    echo -e "No\n Make sure that avr-gcc is in your PATH."  
+    exit
+fi
+echo "OK"
+
+echo -n "checking avr-gcc version ... "
+version=`avr-gcc -dumpversion`
+major=`echo $version | awk -F. ' { print $1; } '`
+minor=`echo $version | awk -F. ' { print $2; } '`
+patch=`echo $version | awk -F. ' { print $3; } '`
+VERSION_REQ="($version)\n **** too old ****\n AVR-Ada requires gcc-4.7.0 or newer"
+
+if [ $major -lt 4 ] ; then
+    echo "$VERSION_REQ"
+    exit 2
+elif [ $major -eq 4 ]; then
+    if [ $minor -lt 7 ] ; then
+        echo -e "$VERSION_REQ"
+        exit 2
+    fi
+fi
+echo "($version)"
+
+
+####################################################################
+echo -n "checking avr-gcc installation directory ... "
+LIBGCC=`avr-gcc -print-libgcc-file-name`
+RTS_BASE=`dirname $LIBGCC`
+PREFIX=`echo $RTS_BASE | sed 's:/[^/]*/[^/]*/[^/]*/[^/]*$::'`
+echo "($PREFIX)"
+
+
+####################################################################
+RTS_DIST=`${PWDCMD-pwd}`/gcc-$major.$minor-rts
+RTS_DIST=`echo $RTS_DIST | sed -e 's!^/cygdrive!!'`
+RTS_DIST=`echo $RTS_DIST | sed -e 's!^/\([a-z]\)/!\1:/!'`
+
+
+####################################################################
+echo -n "checking BUILD directory ... "
+AVR_ADA_HOME=`pwd`
+AVR_ADA_HOME=`echo $AVR_ADA_HOME | sed -e 's!^/cygdrive!!'`
+AVR_ADA_HOME=`echo $AVR_ADA_HOME | sed -e 's!^/\([a-z]\)/!\1:/!'`
+echo "($AVR_ADA_HOME)"
+
+
+####################################################################
+echo
+echo "       Summary"
+echo "       ======="
+echo
+echo "AVR Ada compiler version = $version"
+echo
+echo "The AVR-Ada run/compile-time system (RTS) will be installed in"
+echo "   $RTS_BASE/rts/<MCU>/adainclude"
+echo "   $RTS_BASE/rts/<MCU>/adalib"
+echo
+echo "The AVR-Ada libraries (libavrada.a) will be installed in"
+echo "   $PREFIX/avr/lib/gnat/avr_lib/<MCU>/lib/libavrada.a"
+echo
+
+
+####################################################################
+#
+# write results in config file
+#
+echo "# this file is generated automatically by AVR-Ada configure" > config
+echo "#      ! do not edit !"                                     >> config
+echo "major=$major"                                               >> config
+echo "minor=$minor"                                               >> config
+echo "patch=$patch"                                               >> config
+echo "RTS_BASE=$RTS_BASE"                                         >> config
+echo "PREFIX=$PREFIX"                                             >> config
+echo "AVR_ADA_HOME=$AVR_ADA_HOME"                                 >> config

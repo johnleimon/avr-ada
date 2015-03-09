@@ -1,0 +1,58 @@
+---------------------------------------------------------------------------
+-- The AVR-Ada Library is free software;  you can redistribute it and/or --
+-- modify it under terms of the  GNU General Public License as published --
+-- by  the  Free Software  Foundation;  either  version 2, or  (at  your --
+-- option) any later version.  The AVR-Ada Library is distributed in the --
+-- hope that it will be useful, but  WITHOUT ANY WARRANTY;  without even --
+-- the  implied warranty of MERCHANTABILITY or FITNESS FOR A  PARTICULAR --
+-- PURPOSE. See the GNU General Public License for more details.         --
+--                                                                       --
+-- As a special exception, if other files instantiate generics from this --
+-- unit,  or  you  link  this  unit  with  other  files  to  produce  an --
+-- executable   this  unit  does  not  by  itself  cause  the  resulting --
+-- executable to  be  covered by the  GNU General  Public License.  This --
+-- exception does  not  however  invalidate  any  other reasons why  the --
+-- executable file might be covered by the GNU Public License.           --
+---------------------------------------------------------------------------
+
+
+with AVR;                          use AVR;
+with AVR.MCU;                      use AVR.MCU;
+
+with LCD;
+
+procedure Main is
+
+   procedure Wait_Until_Key_Pressed is
+      pragma Inline (Wait_Until_Key_Pressed);
+   begin
+      while PORTD_Bits (2) = True loop null; end loop;
+      while PORTD_Bits (2) = False loop null; end loop;
+   end Wait_Until_Key_Pressed;
+
+begin
+   DDRD_Bits := (others => DD_Input);        -- make all of PortD input
+   PORTD_Bits (2) := True;                   -- pull up
+
+   LCD.Init;
+
+   loop
+      LCD.Clear_Screen;
+      LCD.Put('H');
+      LCD.Put('a');
+      LCD.Put('l');
+      LCD.Put('l');
+      LCD.Put('o');
+
+      Wait_Until_Key_Pressed;
+
+      LCD.Clear_Screen;
+      LCD.GotoXY (X => 4, Y => 2);
+      LCD.Put('T');
+      LCD.Put('e');
+      LCD.Put('s');
+      LCD.Put('t');
+
+      Wait_Until_Key_Pressed;
+   end loop;
+end Main;
