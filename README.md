@@ -13,7 +13,8 @@ Prerequisites:
 
 apt-get install libmpfr-dev
 apt-get install libmpc-dev
-
+apt-get install texinfo
+apt-get install libc-dev
 
 Building: (Experimental!)
 
