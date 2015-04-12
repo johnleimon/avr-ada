@@ -49,6 +49,10 @@ build_gcc47()
     return 0
   fi
 
+  if [ ! -f gcc-${GCC_VERSION}.tar.gz ]; then
+    wget ftp://ftp.mirrorservice.org/sites/sourceware.org/pub/gcc/releases/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.gz
+  fi
+
   # Uncompress GCC archive #
   if [ ! -d gcc-${GCC_VERSION} ]; then
     tar zxf gcc-${GCC_VERSION}.tar.gz
