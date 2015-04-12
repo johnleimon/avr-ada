@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2014 Tero Koskinen
+#  Copyright (c) 2014, 2015 Tero Koskinen
 #  Copyright (c) 2015 John Leimon
 #
 #  Permission to use, copy, modify, and/or distribute this software for any purpose
@@ -18,7 +18,7 @@
 set -x
 
 GNATPREFIX=$PWD/gnat-native-47
-AVRADAPREFIX=$PWD/avr-ada-47/
+AVRADAPREFIX=$PWD/avr-ada-47
 TOPDIR=$PWD
 
 GCC_VERSION=4.7.2
@@ -37,29 +37,12 @@ fail()
   exit 1
 }
 
-fetch_avrada()
-{
-  echo "------------------------------------------"
-  echo " fetch_avrada()"
-  echo "------------------------------------------"
-
-  if [ ! -d avr-ada ]; then
-    cp -rv ../../avr-ada .
-  fi
-}
-
 # GCC 4.7.x is required for building AVR-Ada 1.2.
 build_gcc47()
 {
   echo "------------------------------------------"
   echo " build_gcc47()"
   echo "------------------------------------------"
-
-  fetch_avrada
-
-  if [ ! -f gcc-${GCC_VERSION}.tar.gz ]; then
-    wget ftp://ftp.mirrorservice.org/sites/sourceware.org/pub/gcc/releases/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.gz
-  fi
 
   if [ -f "$GNATPREFIX/bin/gnatmake" ]; then
     echo "gcc ${GCC_VERSION} already build, skipping"
@@ -95,7 +78,7 @@ build_gcc47()
     echo "TEXINFO is already patched... skipping patch"
   fi
   cd ..
- 
+
   rm -rf gcc-obj-${GCC_VERSION}
   mkdir gcc-obj-${GCC_VERSION} && cd gcc-obj-${GCC_VERSION} || fail "cd gcc-obj-${GCC_VERSION}"
 
@@ -124,7 +107,7 @@ build_gcc47()
   echo "CPLUS_INCLUDE_PATH = '$CPLUS_INCLUDE_PATH'"
   echo "CPATH              = '$CPATH'"
 
-  echo "distribution: $DISTRO"
+  echo "Distribution: $DISTRO"
 
   case "$DISTRO" in
     Debian|Ubuntu|LinuxMint)
@@ -146,20 +129,20 @@ build_avrbinutils()
   echo " build_avrbinutils()"
   echo "------------------------------------------"
 
-  echo "++++++++++++++++ UNIQUE_00 ++++++++++++++++"
-  find $TOPDIR > $TOPDIR/UNIQUE_00
+#  echo "++++++++++++++++ UNIQUE_00 ++++++++++++++++"
+#  if [ ! -f $TOPDIR/UNIQUE_00 ]; then
+#    find $TOPDIR > $TOPDIR/UNIQUE_00
+#  fi
 
   cd $TOPDIR
-  if [ ! -f binutils-2.20.1a.tar.bz2 ]; then
-    wget http://ftp.uni-kl.de/pub/gnu/binutils/binutils-2.20.1a.tar.bz2
-  fi
   if [ -f $AVRADAPREFIX/bin/avr-as ]; then
     echo "avr-binutils already installed, skipping"
     return 0
   fi
-  fetch_avrada
 
-  rm -rf binutils-2.20.1
+  pwd
+  ls -l
+
   tar jxf binutils-2.20.1a.tar.bz2 || fail "binutils: tar"
   cd binutils-2.20.1
   for a in ../avr-ada/patches/binutils/2.20.1/*.patch;
@@ -182,9 +165,11 @@ build_avrbinutils()
         sed -i -e 's/SUBDIRS = /SUBDIRS = #/' ../binutils-2.20.1/gas/Makefile.in
   make || fail "binutils: make"
   make install || fail "binutils: make install"
-  
-  echo "++++++++++++++++ UNIQUE_01 ++++++++++++++++"
-  find $TOPDIR > $TOPDIR/UNIQUE_01
+
+#  echo "++++++++++++++++ UNIQUE_01 ++++++++++++++++"
+#  if [ ! -f $TOPDIR/UNIQUE_01 ]; then
+#    find $TOPDIR > $TOPDIR/UNIQUE_01
+#  fi
 }
 
 build_avrgcc()
@@ -192,13 +177,17 @@ build_avrgcc()
   echo "------------------------------------------"
   echo " build_avrgcc()"
   echo "------------------------------------------"
-  
-  echo "++++++++++++++++ UNIQUE_02 ++++++++++++++++"
-  find $TOPDIR > $TOPDIR/UNIQUE_02
+
+#  echo "++++++++++++++++ UNIQUE_02 ++++++++++++++++"
+#  if [ ! -f $TOPDIR/UNIQUE_02 ]; then
+#    find $TOPDIR > $TOPDIR/UNIQUE_02
+#  fi
+
+  echo "GNATPREFIX = '$GNATPREFIX' AVRADAPREFIX = '$AVRADAPREFIX'"
 
   cd $TOPDIR
   export PATH="$GNATPREFIX/bin":"$AVRADAPREFIX/bin":$PATH
-  export PATH="$AVRADAPREFIX/bin":$PATH
+
   mkdir avr
   if [ -d gcc-${AVR_GCC_VERSION} ]; then
     echo "Removing old gcc-${AVR_GCC_VERSION} dir"
@@ -211,17 +200,12 @@ build_avrgcc()
     echo "avr-gcc already installed, skipping"
     return 0
   fi
+
   cd $TOPDIR/avr
-  if [ -d /usr/lib/x86_64-linux-gnu/ ]; then
-    export LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/
-  fi
+
+  ### i386 Hardware ###
   if [ -d /usr/lib/i386-linux-gnu/ ]; then
     export LIBRARY_PATH=/usr/lib/i386-linux-gnu/
-  fi
-  if [ -d /usr/include/x86_64-linux-gnu ]; then
-    export C_INCLUDE_PATH=/usr/include/x86_64-linux-gnu
-    export CPATH=/usr/include/x86_64-linux-gnu
-    export CPLUS_INCLUDE_PATH=/usr/include/x86_64-linux-gnu
   fi
   if [ -d /usr/include/i386-linux-gnu ]; then
     export C_INCLUDE_PATH=/usr/include/i386-linux-gnu
@@ -229,11 +213,23 @@ build_avrgcc()
     export CPLUS_INCLUDE_PATH=/usr/include/i386-linux-gnu
   fi
 
+  ### x86_64 Hardware ###
+  if [ -d /usr/lib/x86_64-linux-gnu/ ]; then
+    export LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/
+  fi
+  if [ -d /usr/include/x86_64-linux-gnu ]; then
+    export C_INCLUDE_PATH=/usr/include/x86_64-linux-gnu
+    export CPATH=/usr/include/x86_64-linux-gnu
+    export CPLUS_INCLUDE_PATH=/usr/include/x86_64-linux-gnu
+  fi
+
   tar zxf $TOPDIR/gcc-${AVR_GCC_VERSION}.tar.gz || fail "avr-gcc: tar"
   cd gcc-${AVR_GCC_VERSION} || fail "avr-gcc: cd"
+  pwd
   for a in ../../avr-ada/patches/gcc/4.7.2/*.patch;do patch -p0 < $a;done
   cd ..
   rm -rf avr-gcc-obj
+
   mkdir avr-gcc-obj && cd avr-gcc-obj || fail "avr-gcc: mkdir/cd"
   ../gcc-${AVR_GCC_VERSION}/configure --target=avr --program-prefix=avr- \
     --disable-shared --disable-nls --disable-libssp \
@@ -249,9 +245,16 @@ build_avrgcc()
   make install || fail "avr-gcc: make install"
   cd ..
   cd $TOPDIR
-  
-  echo "++++++++++++++++ UNIQUE_03 ++++++++++++++++"
-  find $TOPDIR > $TOPDIR/UNIQUE_03
+
+  if [ ! -f "$AVRADAPREFIX/bin/avr-gnatmake" ]; then
+    echo "avr-gnatmake build failed!"
+    exit 1
+  fi
+
+#  echo "++++++++++++++++ UNIQUE_03 ++++++++++++++++"
+#  if [ ! -f $TOPDIR/UNIQUE_03 ]; then
+#    find $TOPDIR > $TOPDIR/UNIQUE_03
+#  fi
 }
 
 build_avrlibc()
@@ -259,9 +262,11 @@ build_avrlibc()
   echo "------------------------------------------"
   echo " build_avrlibc()"
   echo "------------------------------------------"
-  
-  echo "++++++++++++++++ UNIQUE_04 ++++++++++++++++"
-  find $TOPDIR > $TOPDIR/UNIQUE_04
+
+#  echo "++++++++++++++++ UNIQUE_04 ++++++++++++++++"
+#  if [ ! -f $TOPDIR/UNIQUE_04 ]; then
+#    find $TOPDIR > $TOPDIR/UNIQUE_04
+#  fi
 
   cd $TOPDIR
   export PATH="$AVRADAPREFIX/bin":$PATH
@@ -279,9 +284,11 @@ build_avrlibc()
   make || fail "avr-libc: make"
   make install || fail "avr-libc: make install"
   cd ..
-  
-  echo "++++++++++++++++ UNIQUE_05 ++++++++++++++++"
-  find $TOPDIR > $TOPDIR/UNIQUE_05
+
+#  echo "++++++++++++++++ UNIQUE_05 ++++++++++++++++"
+#  if [ ! -f $TOPDIR/UNIQUE_05 ]; then
+#    find $TOPDIR > $TOPDIR/UNIQUE_05
+#  fi
 }
 
 build_avrada()
@@ -289,15 +296,15 @@ build_avrada()
   echo "------------------------------------------"
   echo " build_avrada()"
   echo "------------------------------------------"
-  
 
   cd $TOPDIR
   export PATH="$AVRADAPREFIX/bin":$PATH
-  fetch_avrada
-  
-  echo "++++++++++++++++ UNIQUE_06 ++++++++++++++++"
-  find $TOPDIR > $TOPDIR/UNIQUE_06
- 
+
+#  echo "++++++++++++++++ UNIQUE_06 ++++++++++++++++"
+#  if [ ! -f $TOPDIR/UNIQUE_06 ]; then
+#    find $TOPDIR > $TOPDIR/UNIQUE_06
+#  fi
+
   # Search for the texinfo patch #
   if [ -f avr-threads.diff ]; then
     PATCH_PATH="../"
@@ -322,18 +329,24 @@ build_avrada()
   cd avr-ada || fail "avr-ada: cd"
   sed -i -e 's/stamp-libs: $(LIB_LIST) $(BOARD_LIB_LIST) $(THREAD_LIB_LIST)/stamp-libs: $(LIB_LIST) $(BOARD_LIB_LIST)/' avr/avr_lib/Makefile
 
-  echo "++++++++++++++++ UNIQUE_07 ++++++++++++++++"
-  find $TOPDIR > $TOPDIR/UNIQUE_07
+#  echo "++++++++++++++++ UNIQUE_07 ++++++++++++++++"
+#  if [ ! -f $TOPDIR/UNIQUE_07 ]; then
+#    find $TOPDIR > $TOPDIR/UNIQUE_07
+#  fi
 
   ./configure                                             # OPERATION_00
-  
-  echo "++++++++++++++++ UNIQUE_08 ++++++++++++++++"
-  find $TOPDIR > $TOPDIR/UNIQUE_08
 
-  make || fail "avr-ada: make"                            # OPERATION_01
-  
-  echo "++++++++++++++++ UNIQUE_09 ++++++++++++++++"
-  find $TOPDIR > $TOPDIR/UNIQUE_09
+#  echo "++++++++++++++++ UNIQUE_08 ++++++++++++++++"
+#  if [ ! -f $TOPDIR/UNIQUE_08 ]; then
+#    find $TOPDIR > $TOPDIR/UNIQUE_08
+#  fi
+
+  make GPRCONFIG=/usr/bin/gprconfig GPRBUILD=/usr/bin/gprbuild || fail "avr-ada: make"                            # OPERATION_01
+
+#  echo "++++++++++++++++ UNIQUE_09 ++++++++++++++++"
+#  if [ ! -f $TOPDIR/UNIQUE_09 ]; then
+#    find $TOPDIR > $TOPDIR/UNIQUE_09
+#  fi
 
   # Clean up from a previous build #
   rm -rfv  $AVRADAPREFIX/lib/gcc/avr/4.7.2/avr25
@@ -347,60 +360,47 @@ build_avrada()
 
   make install_rts || fail "avr-ada: make install_Rts"    # OPERATION_02
 
-  echo "++++++++++++++++ UNIQUE_10 ++++++++++++++++"
-  find $TOPDIR > $TOPDIR/UNIQUE_10
-  
+#  echo "++++++++++++++++ UNIQUE_10 ++++++++++++++++"
+#  if [ ! -f $TOPDIR/UNIQUE_10 ]; then
+#    find $TOPDIR > $TOPDIR/UNIQUE_10
+#  fi
+
   cd avr/avr_lib || fail "avr-ada: cd avr/avr_lib"
   make || fail "avr-ada: make lib"                        # OPERATION_03
-  
-  echo "++++++++++++++++ UNIQUE_11 ++++++++++++++++"
-  find $TOPDIR > $TOPDIR/UNIQUE_11
-  
-  cd ../..
+
+#  echo "++++++++++++++++ UNIQUE_11 ++++++++++++++++"
+#  if [ ! -f $TOPDIR/UNIQUE_11 ]; then
+#    find $TOPDIR > $TOPDIR/UNIQUE_11
+#  fi
+
+  cd ..
   make install_libs || fail "avr-ada: make install_libs"  # OPERATION_04
-  
-  echo "++++++++++++++++ UNIQUE_12 ++++++++++++++++"
-  find $TOPDIR > $TOPDIR/UNIQUE_12
-  
+
+#   echo "++++++++++++++++ UNIQUE_12 ++++++++++++++++"
+#   if [ ! -f $TOPDIR/UNIQUE_12 ]; then
+#     find $TOPDIR > $TOPDIR/UNIQUE_12
+#   fi
+
   cd ..
 }
 
-start_script_timer() { ST="$(date +%s)"; }
-stop_script_timer()  { ST="$(($(date +%s)-T))"; echo "[${ST} seconds]"; }
-start_timer()        { T="$(date +%s)"; }
-stop_timer()         { T="$(($(date +%s)-T))"; echo "[${T} seconds]"; }
+#   echo "++++++++++++++++ UNIQUE_13 ++++++++++++++++"
+#   if [ ! -f $TOPDIR/UNIQUE_13 ]; then
+#     find $TOPDIR > $TOPDIR/UNIQUE_13
+#   fi
 
-start_script_timer
-
-start_timer
-  echo "++++++++++++++++ UNIQUE_13 ++++++++++++++++"
-  find $TOPDIR > $TOPDIR/UNIQUE_13
 build_gcc47
-printf "build_gcc47 ... "
-  echo "++++++++++++++++ UNIQUE_14 ++++++++++++++++"
-  find $TOPDIR > $TOPDIR/UNIQUE_14
-stop_timer
 
-start_timer
+#   echo "++++++++++++++++ UNIQUE_14 ++++++++++++++++"
+#   if [ ! -f $TOPDIR/UNIQUE_14 ]; then
+#     find $TOPDIR > $TOPDIR/UNIQUE_14
+#   fi
+
 build_avrbinutils
-printf "build_avrbinutils ... "
-stop_timer
 
-start_timer
 build_avrgcc
-printf "build_avrgcc ... "
-stop_timer
 
-start_timer
 build_avrlibc
-printf "build_avrlibc ... "
-stop_timer
 
-start_timer
 build_avrada
-printf "build_avrada ... "
-stop_timer
-
-printf " Script runtime "
-stop_script_timer
 
