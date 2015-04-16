@@ -1,0 +1,7 @@
+project Hello extends "avr_app" is
+
+  for Object_Dir use "obj";
+  for Exec_Dir use ".";
+  for Source_Dirs use (".");
+
+end Hello;
