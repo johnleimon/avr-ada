@@ -38,7 +38,7 @@ include ../../excldevs.mk
 
 # list of primary devices
 PRIMARY_MCU_LIST := atmega32 atmega164p attiny2313 atmega8 atmega8u2 atmega168 atmega169 \
-   atmega328p atmega644p atmega2560 at90usb1286 attiny85
+   atmega328p atmega644p atmega2560 at90usb1286 attiny85 atmega6450
 
 # list of all supported devices
 # MCU_LIST = $(filter-out $(excluded_parts), $(shell (ls -d at*)))

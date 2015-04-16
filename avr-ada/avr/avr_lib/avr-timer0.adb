@@ -23,7 +23,7 @@
 --
 --  ATMEGA
 --  atmega168   atmega169   atmega2560  atmega32    atmega328p  atmega644
---  atmega644p  _atmega8_(partly)
+--  atmega644p  atmega6450  _atmega8_(partly)
 
 with Interfaces;                   use Interfaces;
 with AVR;                          use AVR;
@@ -32,14 +32,14 @@ with AVR.MCU;
 package body AVR.Timer0 is
 
 
-#if MCU = "attiny13" or else MCU = "attiny85" or else MCU = "attiny13a" or else MCU = "attiny2313" or else MCU = "attiny4313" or else MCU = "atmega168" or else MCU = "atmega169" or else MCU = "atmega328p" or else MCU = "atmega644" or else MCU = "atmega644p" or else MCU = "atmega2560" or else MCU = "atmega8u2" or else MCU = "at90usb1286" or else MCU = "atmega32u4" or else MCU = "atmega164p" then
+#if MCU = "attiny13" or else MCU = "attiny85" or else MCU = "attiny13a" or else MCU = "attiny2313" or else MCU = "attiny4313" or else MCU = "atmega168" or else MCU = "atmega169" or else MCU = "atmega328p" or else MCU = "atmega644" or else MCU = "atmega644p" or else MCU = "atmega2560" or else MCU = "atmega8u2" or else MCU = "at90usb1286" or else MCU = "atmega32u4" or else MCU = "atmega164p" or else MCU = "atmega6450" then
    Output_Compare_Reg : Unsigned_8 renames MCU.OCR0A;
 #elsif mcu = "atmega32" then
    Output_Compare_Reg : Unsigned_8 renames MCU.OCR0;
 #end if;
 
 
-#if MCU = "attiny13" or else MCU = "attiny85" or else MCU = "attiny13a" or else MCU = "attiny2313" or else MCU = "attiny4313" or else MCU = "atmega168" or else MCU = "atmega169" or else MCU = "atmega328p" or else MCU = "atmega644" or else MCU = "atmega644p" or else MCU = "atmega2560" or else MCU = "atmega8u2" or else MCU = "at90usb1286" or else MCU = "atmega32u4" or else MCU = "atmega164p" then
+#if MCU = "attiny13" or else MCU = "attiny85" or else MCU = "attiny13a" or else MCU = "attiny2313" or else MCU = "attiny4313" or else MCU = "atmega168" or else MCU = "atmega169" or else MCU = "atmega328p" or else MCU = "atmega644" or else MCU = "atmega644p" or else MCU = "atmega2560" or else MCU = "atmega8u2" or else MCU = "at90usb1286" or else MCU = "atmega32u4" or else MCU = "atmega164p" or else MCU = "atmega6450" then
    Ctrl_Reg       : Bits_In_Byte renames MCU.TCCR0A_Bits;
 #elsif MCU = "atmega8" or else MCU = "atmega32" then
    Ctrl_Reg       : Bits_In_Byte renames MCU.TCCR0_Bits;
@@ -48,10 +48,11 @@ package body AVR.Timer0 is
    Prescale_Reg   : Unsigned_8 renames
 #if MCU = "attiny13" or else MCU = "attiny85" or else MCU = "attiny13a" or else MCU = "attiny2313" or else MCU = "attiny4313" or else MCU = "atmega168" or else MCU = "atmega328p" or else MCU = "atmega2560" or else MCU = "atmega8u2" or else MCU = "at90usb1286" or else MCU = "atmega32u4" or else MCU = "atmega164p" then
     MCU.TCCR0B;
-#elsif MCU = "atmega169" or else MCU = "atmega644" or else MCU = "atmega644p" then
+#elsif MCU = "atmega169" or else MCU = "atmega644" or else MCU = "atmega644p" or else MCU = "atmega6450" then
     MCU.TCCR0A;
 #elsif MCU = "atmega8" or else MCU = "atmega32" then
     MCU.TCCR0;
+#elsif MCU = "TODO"
 #end if;
 
 
@@ -66,7 +67,7 @@ package body AVR.Timer0 is
    Interrupt_Mask : Bits_In_Byte renames MCU.TIMSK_Bits;
    Output_Compare_Interrupt_Enable : Boolean renames MCU.TIMSK_Bits (MCU.OCIE0A_Bit);
    Overflow_Interrupt_Enable       : Boolean renames MCU.TIMSK_Bits (MCU.TOIE0_Bit);
-#elsif MCU = "attiny13" or else MCU = "attiny13a" or else MCU = "atmega168" or else MCU = "atmega169" or else MCU = "atmega328p" or else MCU = "atmega644" or else MCU = "atmega644p" or else MCU = "atmega2560" or else MCU = "atmega8u2" or else MCU = "at90usb1286" or else MCU = "atmega32u4" or else MCU = "atmega164p" then
+#elsif MCU = "attiny13" or else MCU = "attiny13a" or else MCU = "atmega168" or else MCU = "atmega169" or else MCU = "atmega328p" or else MCU = "atmega644" or else MCU = "atmega644p" or else MCU = "atmega2560" or else MCU = "atmega8u2" or else MCU = "at90usb1286" or else MCU = "atmega32u4" or else MCU = "atmega164p" or else MCU = "atmega6450" then
    Interrupt_Mask : Bits_In_Byte renames MCU.TIMSK0_Bits;
    Output_Compare_Interrupt_Enable : Boolean renames MCU.TIMSK0_Bits (MCU.OCIE0A_Bit);
    Overflow_Interrupt_Enable       : Boolean renames MCU.TIMSK0_Bits (MCU.TOIE0_Bit);
@@ -100,7 +101,7 @@ package body AVR.Timer0 is
 
    function Scale_By_32     return Scale_Type is
    begin
-#if MCU = "attiny2313" or else MCU = "attiny4313" or else MCU = "attiny85" or else MCU = "atmega168" or else MCU = "atmega328p" or else MCU = "atmega2560" or else MCU = "atmega8u2" or else MCU = "at90usb1286" or else MCU = "atmega32u4" or else MCU = "atmega164p" then
+#if MCU = "attiny2313" or else MCU = "attiny4313" or else MCU = "attiny85" or else MCU = "atmega168" or else MCU = "atmega328p" or else MCU = "atmega2560" or else MCU = "atmega8u2" or else MCU = "at90usb1286" or else MCU = "atmega32u4" or else MCU = "atmega164p" or else MCU = "atmega6450" then
       raise Program_Error with "1/32 not available for this MCU";
 #end if;
       return MCU.CS01_Mask or MCU.CS00_Mask;
@@ -108,7 +109,7 @@ package body AVR.Timer0 is
 
    function Scale_By_64     return Scale_Type is
    begin
-#if MCU = "attiny2313" or else MCU = "attiny4313" or else MCU = "attiny85" or else MCU = "atmega32" or else MCU = "atmega168" or else MCU = "atmega328p" or else MCU = "atmega2560" or else MCU = "atmega8u2" or else MCU = "at90usb1286" or else MCU = "atmega32u4" or else MCU = "atmega164p" then
+#if MCU = "attiny2313" or else MCU = "attiny4313" or else MCU = "attiny85" or else MCU = "atmega32" or else MCU = "atmega168" or else MCU = "atmega328p" or else MCU = "atmega2560" or else MCU = "atmega8u2" or else MCU = "at90usb1286" or else MCU = "atmega32u4" or else MCU = "atmega164p" or else MCU = "atmega6450" then
       return MCU.CS01_Mask or MCU.CS00_Mask;
 #else
       return MCU.CS02_Mask;
@@ -117,7 +118,7 @@ package body AVR.Timer0 is
 
    function Scale_By_128    return Scale_Type is
    begin
-#if MCU = "attiny2313" or else MCU = "attiny4313" or else MCU = "attiny85" or else MCU = "atmega168" or else MCU = "atmega328p" or else MCU = "atmega2560" or else MCU = "atmega8u2" or else MCU = "at90usb1286" or else MCU = "atmega164p" or else MCU = "atmega32u4" then
+#if MCU = "attiny2313" or else MCU = "attiny4313" or else MCU = "attiny85" or else MCU = "atmega168" or else MCU = "atmega328p" or else MCU = "atmega2560" or else MCU = "atmega8u2" or else MCU = "at90usb1286" or else MCU = "atmega164p" or else MCU = "atmega32u4" or else MCU = "atmega6450" then
       raise Program_Error with "1/128 not available for this MCU";
 #end if;
       return MCU.CS02_Mask or MCU.CS00_Mask;
@@ -125,7 +126,7 @@ package body AVR.Timer0 is
 
    function Scale_By_256    return Scale_Type is
    begin
-#if MCU = "attiny2313" or else MCU = "attiny4313" or else MCU = "attiny85" or else MCU = "atmega8" or else MCU = "atmega32" or else MCU = "atmega168" or else MCU = "atmega328p" or else MCU = "atmega2560" or else MCU = "atmega8u2" or else MCU = "at90usb1286" or else MCU = "atmega32u4" or else MCU = "atmega164p" then
+#if MCU = "attiny2313" or else MCU = "attiny4313" or else MCU = "attiny85" or else MCU = "atmega8" or else MCU = "atmega32" or else MCU = "atmega168" or else MCU = "atmega328p" or else MCU = "atmega2560" or else MCU = "atmega8u2" or else MCU = "at90usb1286" or else MCU = "atmega32u4" or else MCU = "atmega164p" or else MCU = "atmega6450" then
       return MCU.CS02_Mask;
 #else
       return MCU.CS02_Mask or MCU.CS01_Mask;
@@ -134,7 +135,7 @@ package body AVR.Timer0 is
 
    function Scale_By_1024   return Scale_Type is
    begin
-#if MCU = "attiny2313" or else MCU = "attiny4313" or else MCU = "attiny85" or else MCU = "atmega32" or else MCU = "atmega168" or else MCU = "atmega328p" or else MCU = "atmega2560" or else MCU = "atmega8u2" or else MCU = "at90usb1286" or else MCU = "atmega164p" or else MCU = "atmega32u4" then
+#if MCU = "attiny2313" or else MCU = "attiny4313" or else MCU = "attiny85" or else MCU = "atmega32" or else MCU = "atmega168" or else MCU = "atmega328p" or else MCU = "atmega2560" or else MCU = "atmega8u2" or else MCU = "at90usb1286" or else MCU = "atmega164p" or else MCU = "atmega32u4" or else MCU = "atmega6450" then
       return MCU.CS02_Mask or MCU.CS00_Mask;
 #else
       return MCU.CS02_Mask or MCU.CS01_Mask or MCU.CS00_Mask;
@@ -145,7 +146,7 @@ package body AVR.Timer0 is
    procedure Init_Normal (Prescaler : Scale_Type)
    is
    begin
-#if MCU = "attiny13" or else MCU = "attiny13a" or else MCU = "attiny85" or else MCU = "attiny2313" or else MCU = "attiny4313" or else MCU = "atmega168" or else MCU = "atmega169" or else MCU = "atmega328p" or else MCU = "atmega644p" or else MCU = "atmega8u2" or else MCU = "at90usb1286" or else MCU = "atmega32u4" then
+#if MCU = "attiny13" or else MCU = "attiny13a" or else MCU = "attiny85" or else MCU = "attiny2313" or else MCU = "attiny4313" or else MCU = "atmega168" or else MCU = "atmega169" or else MCU = "atmega328p" or else MCU = "atmega644p" or else MCU = "atmega8u2" or else MCU = "at90usb1286" or else MCU = "atmega32u4" or else MCU = "atmega6450" then
       Ctrl_Reg := (MCU.COM0A0_Bit => False, --  \  normal operation,
                    MCU.COM0A1_Bit => False, --  /  OC0 disconnected
 
@@ -191,7 +192,7 @@ package body AVR.Timer0 is
    begin
       --  set the control register with the prescaler and mode flags to
       --  timer output compare mode and clear timer on compare match
-#if MCU = "attiny13" or else MCU = "attiny13a" or else MCU = "attiny85" or else MCU = "attiny2313" or else MCU = "attiny4313" or else MCU = "atmega168" or else MCU = "atmega169" or else MCU = "atmega328p" or else MCU = "atmega644" or else MCU = "atmega644p" or else MCU = "atmega8u2" or else MCU = "at90usb1286" or else MCU = "atmega32u4" then
+#if MCU = "attiny13" or else MCU = "attiny13a" or else MCU = "attiny85" or else MCU = "attiny2313" or else MCU = "attiny4313" or else MCU = "atmega168" or else MCU = "atmega169" or else MCU = "atmega328p" or else MCU = "atmega644" or else MCU = "atmega644p" or else MCU = "atmega8u2" or else MCU = "at90usb1286" or else MCU = "atmega32u4" or else MCU = "atmega6450" then
       Ctrl_Reg := (MCU.COM0A0_Bit => False, --  \  normal operation,
                    MCU.COM0A1_Bit => False, --  /  OC0 disconnected
 
@@ -235,7 +236,7 @@ package body AVR.Timer0 is
    end Init_CTC;
 
 
-#if MCU = "attiny13" or else MCU = "attiny13a" or else MCU = "attiny85"  or else MCU = "attiny2313" or else MCU = "attiny4313" or else MCU = "atmega168" or else MCU = "atmega169" or else MCU = "atmega2560" or else MCU = "atmega328p" or else MCU = "atmega644" or else MCU = "atmega644p" or else MCU = "atmega8u2" or else MCU = "at90usb1286" or else MCU = "atmega164p" or else MCU = "atmega32u4" then
+#if MCU = "attiny13" or else MCU = "attiny13a" or else MCU = "attiny85"  or else MCU = "attiny2313" or else MCU = "attiny4313" or else MCU = "atmega168" or else MCU = "atmega169" or else MCU = "atmega2560" or else MCU = "atmega328p" or else MCU = "atmega644" or else MCU = "atmega644p" or else MCU = "atmega8u2" or else MCU = "at90usb1286" or else MCU = "atmega164p" or else MCU = "atmega32u4" or else MCU = "atmega6450" then
    Com0 : Boolean renames Ctrl_Reg (MCU.COM0A0_Bit);
    Com1 : Boolean renames Ctrl_Reg (MCU.COM0A1_Bit);
 #elsif MCU = "atmega32" then
