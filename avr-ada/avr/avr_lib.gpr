@@ -277,7 +277,8 @@ library project AVR_Lib is
 
       when "atmega6450" =>
          for Source_Files use
-           Std_Sources & Timer0_Sources & Time_Sources & Sleep_Sources;
+           Std_Sources & Timer0_Sources & Time_Sources & Sleep_Sources &
+           UART_Sources & Serial_Sources;
 
       when others =>
          for Source_Files use Std_Sources;

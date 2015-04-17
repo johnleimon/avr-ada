@@ -43,7 +43,7 @@ private package AVR.UART_Config is
 
 #if MCU = "atmega162" then
    Rx_Name    : constant String := MCU.Sig_USART0_RXC_String;
-#elsif MCU = "atmega168" or else MCU = "atmega328p" then
+#elsif MCU = "atmega168" or else MCU = "atmega328p" or else MCU = "atmega6450" then
    Rx_Name    : constant String := MCU.Sig_USART_RX_String;
 #else
    Rx_Name    : constant String := MCU.Sig_USART0_RX_String;
