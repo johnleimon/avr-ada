@@ -16,16 +16,9 @@
 #!/bin/sh
 
 # Uncomment for script verbose mode #
-set -x
+# set -x
 
-# Set in check_system()
-
-# GNATPREFIX=$PWD/gnat-native-47
-# AVRADAPREFIX=$PWD/avr-ada-47
 TOPDIR=$PWD
-
-GCC_VERSION=4.7.2
-AVR_GCC_VERSION=4.7.2
 
 LSB_REL=`lsb_release -i|tr "\t" " "|tr -s " "|cut -f3 -d" "`
 if [ x"$LSB_REL" != x"" ]; then
@@ -66,8 +59,7 @@ check_system()
   echo "............. OK [Version $CONFIG_GNAT]"
 }
 
-# GCC 4.7.x is required for building AVR-Ada 1.2.
-build_gcc47()
+build_gcc()
 {
   echo "------------------------------------------"
   echo " build_gcc47()"
@@ -332,14 +324,14 @@ build_avrada()
   make GPRCONFIG=/usr/bin/gprconfig GPRBUILD=/usr/bin/gprbuild || fail "avr-ada: make"                            # OPERATION_01
 
   # Clean up from a previous build #
-  rm -rfv  $AVRADAPREFIX/lib/gcc/avr/4.7.2/avr25
-  rm -rfv  $AVRADAPREFIX/lib/gcc/avr/4.7.2/avr3
-  rm -rfv  $AVRADAPREFIX/lib/gcc/avr/4.7.2/avr31
-  rm -rfv  $AVRADAPREFIX/lib/gcc/avr/4.7.2/avr35
-  rm -rfv  $AVRADAPREFIX/lib/gcc/avr/4.7.2/avr4
-  rm -rfv  $AVRADAPREFIX/lib/gcc/avr/4.7.2/avr5
-  rm -rfv  $AVRADAPREFIX/lib/gcc/avr/4.7.2/avr51
-  rm -rfv  $AVRADAPREFIX/lib/gcc/avr/4.7.2/avr6
+  rm -rfv  $AVRADAPREFIX/lib/gcc/avr/$CONFIG_GNAT/avr25
+  rm -rfv  $AVRADAPREFIX/lib/gcc/avr/$CONFIG_GNAT/avr3
+  rm -rfv  $AVRADAPREFIX/lib/gcc/avr/$CONFIG_GNAT/avr31
+  rm -rfv  $AVRADAPREFIX/lib/gcc/avr/$CONFIG_GNAT/avr35
+  rm -rfv  $AVRADAPREFIX/lib/gcc/avr/$CONFIG_GNAT/avr4
+  rm -rfv  $AVRADAPREFIX/lib/gcc/avr/$CONFIG_GNAT/avr5
+  rm -rfv  $AVRADAPREFIX/lib/gcc/avr/$CONFIG_GNAT/avr51
+  rm -rfv  $AVRADAPREFIX/lib/gcc/avr/$CONFIG_GNAT/avr6
 
   make install_rts || fail "avr-ada: make install_Rts"    # OPERATION_02
 
@@ -352,9 +344,23 @@ build_avrada()
   cd ..
 }
 
+check_build()
+{
+  if [ -f $AVRADAPREFIX/bin/avr-gnatmake ];then
+    echo "......................................................"
+    echo " AVR Ada build complete"
+    echo ""
+    echo " Binaries are located at:"
+    echo " $AVRADAPREFIX/bin"
+    echo "......................................................"
+  else 
+    echo "AVR Ada build did not complete sucessfully"
+  fi
+}
+
 check_system
 
-build_gcc47
+build_gcc
 
 build_avrbinutils
 
@@ -363,3 +369,5 @@ build_avrgcc
 build_avrlibc
 
 build_avrada
+
+check_build

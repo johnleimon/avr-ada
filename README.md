@@ -12,14 +12,18 @@ Tero's original AVR Ada build script is here: https://bitbucket.org/tkoskine/avr
 
 Prerequisites:
 
-> apt-get install build-essential libc6-dev gnat-4.6 libgmp-dev bison flex libmpfr-dev libmpc-dev texinfo zlib1g-dev
+> apt-get install gnat-4.6
+
+[OR]
+
+> apt-get install gnat-4.9
+
+[AND]
+
+> apt-get install build-essential libc6-dev libgmp-dev bison flex libmpfr-dev libmpc-dev texinfo zlib1g-dev
 
 Building:
 
 Run the build script:
 
 > ./build.sh
-
-Binaries:
-
-AVR Ada binaries will be built in ./avr-ada-47/bin
