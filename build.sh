@@ -15,14 +15,10 @@
 #
 #!/bin/sh
 
-set -x
+# Uncomment for script verbose mode #
+# set -x
 
-GNATPREFIX=$PWD/gnat-native-47
-AVRADAPREFIX=$PWD/avr-ada-47
 TOPDIR=$PWD
-
-GCC_VERSION=4.7.2
-AVR_GCC_VERSION=4.7.2
 
 LSB_REL=`lsb_release -i|tr "\t" " "|tr -s " "|cut -f3 -d" "`
 if [ x"$LSB_REL" != x"" ]; then
@@ -37,8 +33,33 @@ fail()
   exit 1
 }
 
-# GCC 4.7.x is required for building AVR-Ada 1.2.
-build_gcc47()
+check_system()
+{
+  echo -n "Checking for GNAT"
+
+  gnat > /dev/null 2>&1
+
+  if [ $? -ne 0 ]
+  then
+    echo "............. Missing!"
+    echo "Building AVR Ada requires a GNAT compiler."
+    exit 1
+  fi
+
+  CONFIG_GNAT=`gnat 2>/dev/null | sed -n 1p | grep -wo -E "[0-9]*\.{1}[0-9]*\.*[0-9]*"`
+  CONFIG_GNAT_MAJOR=`gnat 2>/dev/null | sed -n 1p | grep -wo -E "[0-9]*\.{1}[0-9]*"`
+  CONFIG_GNAT_SHORT=`echo $CONFIG_GNAT_MAJOR | sed 's/\.//'`
+
+  GNATPREFIX=$PWD/gnat-native-$CONFIG_GNAT_SHORT
+  AVRADAPREFIX=$PWD/avr-ada-$CONFIG_GNAT_SHORT
+
+  GCC_VERSION=$CONFIG_GNAT
+  AVR_GCC_VERSION=$CONFIG_GNAT
+
+  echo "............. OK [Version $CONFIG_GNAT]"
+}
+
+build_gcc()
 {
   echo "------------------------------------------"
   echo " build_gcc47()"
@@ -115,7 +136,7 @@ build_gcc47()
 
   case "$DISTRO" in
     Debian|Ubuntu|LinuxMint)
-      ADAC=gcc-4.6 CC=gcc-4.6 ../gcc-${GCC_VERSION}/configure --enable-languages=c,ada --prefix=$GNATPREFIX --disable-multilib --without-cloog --without-ppl || fail "gcc: configure"
+      ADAC=gcc-$CONFIG_GNAT_MAJOR CC=gcc-$CONFIG_GNAT_MAJOR ../gcc-${GCC_VERSION}/configure --enable-languages=c,ada --prefix=$GNATPREFIX --disable-multilib --without-cloog --without-ppl || fail "gcc: configure"
       ;;
     *)
       ../gcc-${GCC_VERSION}/configure --enable-languages=c,ada --prefix=$GNATPREFIX || fail "gcc: configure"
@@ -132,11 +153,6 @@ build_avrbinutils()
   echo "------------------------------------------"
   echo " build_avrbinutils()"
   echo "------------------------------------------"
-
-#  echo "++++++++++++++++ UNIQUE_00 ++++++++++++++++"
-#  if [ ! -f $TOPDIR/UNIQUE_00 ]; then
-#    find $TOPDIR > $TOPDIR/UNIQUE_00
-#  fi
 
   cd $TOPDIR
   if [ -f $AVRADAPREFIX/bin/avr-as ]; then
@@ -169,11 +185,6 @@ build_avrbinutils()
         sed -i -e 's/SUBDIRS = /SUBDIRS = #/' ../binutils-2.20.1/gas/Makefile.in
   make || fail "binutils: make"
   make install || fail "binutils: make install"
-
-#  echo "++++++++++++++++ UNIQUE_01 ++++++++++++++++"
-#  if [ ! -f $TOPDIR/UNIQUE_01 ]; then
-#    find $TOPDIR > $TOPDIR/UNIQUE_01
-#  fi
 }
 
 build_avrgcc()
@@ -181,11 +192,6 @@ build_avrgcc()
   echo "------------------------------------------"
   echo " build_avrgcc()"
   echo "------------------------------------------"
-
-#  echo "++++++++++++++++ UNIQUE_02 ++++++++++++++++"
-#  if [ ! -f $TOPDIR/UNIQUE_02 ]; then
-#    find $TOPDIR > $TOPDIR/UNIQUE_02
-#  fi
 
   echo "GNATPREFIX = '$GNATPREFIX' AVRADAPREFIX = '$AVRADAPREFIX'"
 
@@ -230,7 +236,7 @@ build_avrgcc()
   tar zxf $TOPDIR/gcc-${AVR_GCC_VERSION}.tar.gz || fail "avr-gcc: tar"
   cd gcc-${AVR_GCC_VERSION} || fail "avr-gcc: cd"
   pwd
-  for a in ../../avr-ada/patches/gcc/4.7.2/*.patch;do patch -p0 < $a;done
+  for a in ../../avr-ada/patches/gcc/$AVR_GCC_VERSION/*.patch;do patch -p0 < $a;done
   cd ..
   rm -rf avr-gcc-obj
 
@@ -254,11 +260,6 @@ build_avrgcc()
     echo "avr-gnatmake build failed!"
     exit 1
   fi
-
-#  echo "++++++++++++++++ UNIQUE_03 ++++++++++++++++"
-#  if [ ! -f $TOPDIR/UNIQUE_03 ]; then
-#    find $TOPDIR > $TOPDIR/UNIQUE_03
-#  fi
 }
 
 build_avrlibc()
@@ -266,11 +267,6 @@ build_avrlibc()
   echo "------------------------------------------"
   echo " build_avrlibc()"
   echo "------------------------------------------"
-
-#  echo "++++++++++++++++ UNIQUE_04 ++++++++++++++++"
-#  if [ ! -f $TOPDIR/UNIQUE_04 ]; then
-#    find $TOPDIR > $TOPDIR/UNIQUE_04
-#  fi
 
   cd $TOPDIR
   export PATH="$AVRADAPREFIX/bin":$PATH
@@ -288,11 +284,6 @@ build_avrlibc()
   make || fail "avr-libc: make"
   make install || fail "avr-libc: make install"
   cd ..
-
-#  echo "++++++++++++++++ UNIQUE_05 ++++++++++++++++"
-#  if [ ! -f $TOPDIR/UNIQUE_05 ]; then
-#    find $TOPDIR > $TOPDIR/UNIQUE_05
-#  fi
 }
 
 build_avrada()
@@ -303,11 +294,6 @@ build_avrada()
 
   cd $TOPDIR
   export PATH="$AVRADAPREFIX/bin":$PATH
-
-#  echo "++++++++++++++++ UNIQUE_06 ++++++++++++++++"
-#  if [ ! -f $TOPDIR/UNIQUE_06 ]; then
-#    find $TOPDIR > $TOPDIR/UNIQUE_06
-#  fi
 
   # Search for the texinfo patch #
   if [ -f avr-threads.diff ]; then
@@ -333,72 +319,48 @@ build_avrada()
   cd avr-ada || fail "avr-ada: cd"
   sed -i -e 's/stamp-libs: $(LIB_LIST) $(BOARD_LIB_LIST) $(THREAD_LIB_LIST)/stamp-libs: $(LIB_LIST) $(BOARD_LIB_LIST)/' avr/avr_lib/Makefile
 
-#  echo "++++++++++++++++ UNIQUE_07 ++++++++++++++++"
-#  if [ ! -f $TOPDIR/UNIQUE_07 ]; then
-#    find $TOPDIR > $TOPDIR/UNIQUE_07
-#  fi
-
   ./configure                                             # OPERATION_00
-
-#  echo "++++++++++++++++ UNIQUE_08 ++++++++++++++++"
-#  if [ ! -f $TOPDIR/UNIQUE_08 ]; then
-#    find $TOPDIR > $TOPDIR/UNIQUE_08
-#  fi
 
   make GPRCONFIG=/usr/bin/gprconfig GPRBUILD=/usr/bin/gprbuild || fail "avr-ada: make"                            # OPERATION_01
 
-#  echo "++++++++++++++++ UNIQUE_09 ++++++++++++++++"
-#  if [ ! -f $TOPDIR/UNIQUE_09 ]; then
-#    find $TOPDIR > $TOPDIR/UNIQUE_09
-#  fi
-
   # Clean up from a previous build #
-  rm -rfv  $AVRADAPREFIX/lib/gcc/avr/4.7.2/avr25
-  rm -rfv  $AVRADAPREFIX/lib/gcc/avr/4.7.2/avr3
-  rm -rfv  $AVRADAPREFIX/lib/gcc/avr/4.7.2/avr31
-  rm -rfv  $AVRADAPREFIX/lib/gcc/avr/4.7.2/avr35
-  rm -rfv  $AVRADAPREFIX/lib/gcc/avr/4.7.2/avr4
-  rm -rfv  $AVRADAPREFIX/lib/gcc/avr/4.7.2/avr5
-  rm -rfv  $AVRADAPREFIX/lib/gcc/avr/4.7.2/avr51
-  rm -rfv  $AVRADAPREFIX/lib/gcc/avr/4.7.2/avr6
+  rm -rfv  $AVRADAPREFIX/lib/gcc/avr/$CONFIG_GNAT/avr25
+  rm -rfv  $AVRADAPREFIX/lib/gcc/avr/$CONFIG_GNAT/avr3
+  rm -rfv  $AVRADAPREFIX/lib/gcc/avr/$CONFIG_GNAT/avr31
+  rm -rfv  $AVRADAPREFIX/lib/gcc/avr/$CONFIG_GNAT/avr35
+  rm -rfv  $AVRADAPREFIX/lib/gcc/avr/$CONFIG_GNAT/avr4
+  rm -rfv  $AVRADAPREFIX/lib/gcc/avr/$CONFIG_GNAT/avr5
+  rm -rfv  $AVRADAPREFIX/lib/gcc/avr/$CONFIG_GNAT/avr51
+  rm -rfv  $AVRADAPREFIX/lib/gcc/avr/$CONFIG_GNAT/avr6
 
   make install_rts || fail "avr-ada: make install_Rts"    # OPERATION_02
-
-#  echo "++++++++++++++++ UNIQUE_10 ++++++++++++++++"
-#  if [ ! -f $TOPDIR/UNIQUE_10 ]; then
-#    find $TOPDIR > $TOPDIR/UNIQUE_10
-#  fi
 
   cd avr/avr_lib || fail "avr-ada: cd avr/avr_lib"
   make || fail "avr-ada: make lib"                        # OPERATION_03
 
-#  echo "++++++++++++++++ UNIQUE_11 ++++++++++++++++"
-#  if [ ! -f $TOPDIR/UNIQUE_11 ]; then
-#    find $TOPDIR > $TOPDIR/UNIQUE_11
-#  fi
-
   cd ..
   make install_libs || fail "avr-ada: make install_libs"  # OPERATION_04
-
-#   echo "++++++++++++++++ UNIQUE_12 ++++++++++++++++"
-#   if [ ! -f $TOPDIR/UNIQUE_12 ]; then
-#     find $TOPDIR > $TOPDIR/UNIQUE_12
-#   fi
 
   cd ..
 }
 
-#   echo "++++++++++++++++ UNIQUE_13 ++++++++++++++++"
-#   if [ ! -f $TOPDIR/UNIQUE_13 ]; then
-#     find $TOPDIR > $TOPDIR/UNIQUE_13
-#   fi
+check_build()
+{
+  if [ -f $AVRADAPREFIX/bin/avr-gnatmake ];then
+    echo "......................................................"
+    echo " AVR Ada build complete"
+    echo ""
+    echo " Binaries are located at:"
+    echo " $AVRADAPREFIX/bin"
+    echo "......................................................"
+  else 
+    echo "AVR Ada build did not complete sucessfully"
+  fi
+}
 
-build_gcc47
+check_system
 
-#   echo "++++++++++++++++ UNIQUE_14 ++++++++++++++++"
-#   if [ ! -f $TOPDIR/UNIQUE_14 ]; then
-#     find $TOPDIR > $TOPDIR/UNIQUE_14
-#   fi
+build_gcc
 
 build_avrbinutils
 
@@ -408,3 +370,4 @@ build_avrlibc
 
 build_avrada
 
+check_build
